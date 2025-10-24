@@ -271,24 +271,12 @@ export default function CarDetails() {
           </Card>
 
           {/* Features */}
-          {(car.features?.length > 0 || car.features_en?.length > 0 || car.features_ar?.length > 0) && (
+          {(car.features_en?.length > 0 || car.features_ar?.length > 0) && (
             <Card>
               <CardHeader>
                 <CardTitle>المميزات</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {car.features?.length > 0 && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">مميزات عامة</p>
-                    <div className="flex flex-wrap gap-2">
-                      {car.features.map((feature: string, index: number) => (
-                        <Badge key={index} variant="secondary">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 {car.features_en?.length > 0 && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">مميزات (English)</p>

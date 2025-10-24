@@ -36,7 +36,6 @@ const formSchema = z.object({
   ownership_price: z.coerce.number().optional().nullable(),
   discount_percentage: z.coerce.number().min(0).max(100).default(0),
   offer_expires_at: z.string().optional().nullable(),
-  features: z.array(z.string()).default([]),
   features_en: z.array(z.string()).default([]),
   features_ar: z.array(z.string()).default([]),
   branch_description_en: z.string().optional().nullable(),
@@ -114,7 +113,6 @@ export default function CarEdit() {
         ownership_price: data.ownership_price || undefined,
         discount_percentage: data.discount_percentage,
         offer_expires_at: data.offer_expires_at || undefined,
-        features: data.features || [],
         features_en: data.features_en || [],
         features_ar: data.features_ar || [],
         branch_description_en: data.branch_description_en || undefined,
@@ -547,24 +545,6 @@ export default function CarEdit() {
             <div>
               <h3 className="text-lg font-semibold mb-4">المميزات</h3>
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="features"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>مميزات عامة</FormLabel>
-                      <FormControl>
-                        <FeaturesInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="أضف ميزة..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="features_en"

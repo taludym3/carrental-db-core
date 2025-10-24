@@ -36,7 +36,6 @@ const formSchema = z.object({
   ownership_price: z.coerce.number().optional(),
   discount_percentage: z.coerce.number().min(0).max(100).default(0),
   offer_expires_at: z.string().optional(),
-  features: z.array(z.string()).default([]),
   features_en: z.array(z.string()).default([]),
   features_ar: z.array(z.string()).default([]),
   branch_description_en: z.string().optional(),
@@ -64,7 +63,6 @@ export default function CarsAdd() {
       available_quantity: 1,
       rental_types: ["daily"],
       discount_percentage: 0,
-      features: [],
       features_en: [],
       features_ar: [],
       branch_images: [],
@@ -509,24 +507,6 @@ export default function CarsAdd() {
             <div>
               <h3 className="text-lg font-semibold mb-4">المميزات</h3>
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="features"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>مميزات عامة</FormLabel>
-                      <FormControl>
-                        <FeaturesInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="أضف ميزة..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="features_en"
