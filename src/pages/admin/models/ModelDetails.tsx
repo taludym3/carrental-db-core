@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { ArrowRight, Pencil, Trash2 } from 'lucide-react';
+import { ArrowRight, Pencil, Trash2, Gauge, Settings, Fuel, Zap, Cog } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+
+interface Specifications {
+  power?: string;
+  engine?: string;
+  drivetrain?: string;
+  fuel_economy?: string;
+  transmission?: string;
+}
 
 const ModelDetails = () => {
   const { id } = useParams();
@@ -244,13 +252,57 @@ const ModelDetails = () => {
         {/* Specifications Card */}
         <Card>
           <CardHeader>
-            <CardTitle>المواصفات</CardTitle>
+            <CardTitle>المواصفات الفنية</CardTitle>
           </CardHeader>
           <CardContent>
             {model.specifications && Object.keys(model.specifications).length > 0 ? (
-              <pre className="bg-muted p-4 rounded-lg overflow-auto text-sm">
-                {JSON.stringify(model.specifications, null, 2)}
-              </pre>
+              <div className="grid grid-cols-1 gap-4">
+                {(model.specifications as Specifications).power && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <Zap className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">القوة الحصانية</p>
+                      <p className="font-semibold">{(model.specifications as Specifications).power}</p>
+                    </div>
+                  </div>
+                )}
+                {(model.specifications as Specifications).engine && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <Settings className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">المحرك</p>
+                      <p className="font-semibold">{(model.specifications as Specifications).engine}</p>
+                    </div>
+                  </div>
+                )}
+                {(model.specifications as Specifications).drivetrain && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <Gauge className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">نظام الدفع</p>
+                      <p className="font-semibold">{(model.specifications as Specifications).drivetrain}</p>
+                    </div>
+                  </div>
+                )}
+                {(model.specifications as Specifications).fuel_economy && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <Fuel className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">استهلاك الوقود</p>
+                      <p className="font-semibold">{(model.specifications as Specifications).fuel_economy}</p>
+                    </div>
+                  </div>
+                )}
+                {(model.specifications as Specifications).transmission && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <Cog className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">ناقل الحركة</p>
+                      <p className="font-semibold">{(model.specifications as Specifications).transmission}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <p className="text-muted-foreground">لا توجد مواصفات</p>
             )}

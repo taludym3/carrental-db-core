@@ -27,6 +27,15 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import { ArrowRight } from 'lucide-react';
 import { ImageUploader } from '@/components/admin/ImageUploader';
+import { SpecificationsInput } from '@/components/admin/SpecificationsInput';
+
+interface Specifications {
+  power?: string;
+  engine?: string;
+  drivetrain?: string;
+  fuel_economy?: string;
+  transmission?: string;
+}
 
 const formSchema = z.object({
   name_en: z.string().min(1, 'الاسم بالإنجليزية مطلوب').max(100),
@@ -35,8 +44,13 @@ const formSchema = z.object({
   year: z.number().min(1900, 'السنة يجب أن تكون بعد 1900').max(new Date().getFullYear() + 1, 'السنة غير صحيحة'),
   description_en: z.string().max(500).optional(),
   description_ar: z.string().max(500).optional(),
-  specifications: z.string().optional(),
   is_active: z.boolean().default(true),
+  // Specification fields
+  spec_power: z.string().optional(),
+  spec_engine: z.string().optional(),
+  spec_drivetrain: z.string().optional(),
+  spec_fuel_economy: z.string().optional(),
+  spec_transmission: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -56,8 +70,12 @@ const ModelEdit = () => {
       year: new Date().getFullYear(),
       description_en: '',
       description_ar: '',
-      specifications: '',
       is_active: true,
+      spec_power: '',
+      spec_engine: '',
+      spec_drivetrain: '',
+      spec_fuel_economy: '',
+      spec_transmission: '',
     },
   });
 
@@ -95,6 +113,7 @@ const ModelEdit = () => {
   // Update form when model data is loaded
   useEffect(() => {
     if (model) {
+      const specs = (model.specifications as Specifications) || {};
       form.reset({
         name_en: model.name_en,
         name_ar: model.name_ar || '',
@@ -102,8 +121,12 @@ const ModelEdit = () => {
         year: model.year,
         description_en: model.description_en || '',
         description_ar: model.description_ar || '',
-        specifications: model.specifications ? JSON.stringify(model.specifications, null, 2) : '',
         is_active: model.is_active,
+        spec_power: specs.power || '',
+        spec_engine: specs.engine || '',
+        spec_drivetrain: specs.drivetrain || '',
+        spec_fuel_economy: specs.fuel_economy || '',
+        spec_transmission: specs.transmission || '',
       });
       setImageUrl(model.default_image_url || '');
     }
@@ -112,14 +135,13 @@ const ModelEdit = () => {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      let specifications = {};
-      if (values.specifications) {
-        try {
-          specifications = JSON.parse(values.specifications);
-        } catch (e) {
-          throw new Error('صيغة المواصفات غير صحيحة (يجب أن تكون JSON)');
-        }
-      }
+      // Build specifications object from individual fields
+      const specifications: Record<string, string> = {};
+      if (values.spec_power) specifications.power = values.spec_power;
+      if (values.spec_engine) specifications.engine = values.spec_engine;
+      if (values.spec_drivetrain) specifications.drivetrain = values.spec_drivetrain;
+      if (values.spec_fuel_economy) specifications.fuel_economy = values.spec_fuel_economy;
+      if (values.spec_transmission) specifications.transmission = values.spec_transmission;
 
       const { error } = await supabase
         .from('car_models')
@@ -131,7 +153,7 @@ const ModelEdit = () => {
           description_en: values.description_en || null,
           description_ar: values.description_ar || null,
           default_image_url: imageUrl || null,
-          specifications,
+          specifications: Object.keys(specifications).length > 0 ? specifications : null,
           is_active: values.is_active,
         })
         .eq('id', id!);
@@ -329,24 +351,7 @@ const ModelEdit = () => {
           </div>
 
           {/* Specifications */}
-          <FormField
-            control={form.control}
-            name="specifications"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>المواصفات (JSON)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder='{"engine": "2.5L", "horsepower": "203 HP"}'
-                    className="resize-none font-mono"
-                    rows={4}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <SpecificationsInput form={form} initialValue={model?.specifications as Specifications} />
 
           {/* Image Upload */}
           <div className="space-y-2">
