@@ -61,9 +61,17 @@ const BrandsList = () => {
 
       refetch();
     } catch (error: any) {
+      let errorMessage = 'حدث خطأ أثناء الحذف';
+      
+      // Check for foreign key constraint errors
+      if (error.message?.includes('foreign key constraint') || 
+          error.code === '23503') {
+        errorMessage = 'لا يمكن حذف هذه العلامة التجارية لأنها مرتبطة بموديلات موجودة في النظام. يجب حذف الموديلات أولاً.';
+      }
+      
       toast({
         title: 'خطأ في الحذف',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -181,7 +189,13 @@ const BrandsList = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف هذه العلامة التجارية؟ لا يمكن التراجع عن هذا الإجراء.
+              هل أنت متأكد من حذف هذه العلامة التجارية؟
+              <span className="block mt-2 text-amber-600 font-medium">
+                ⚠️ ملاحظة: إذا كان لهذه العلامة موديلات مرتبطة، سيفشل الحذف. يجب حذف الموديلات أولاً.
+              </span>
+              <span className="block mt-1 text-muted-foreground text-sm">
+                لا يمكن التراجع عن هذا الإجراء.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

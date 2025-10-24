@@ -103,10 +103,18 @@ const ModelsList = () => {
       });
       setDeleteModelId(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      let errorMessage = 'حدث خطأ أثناء الحذف';
+      
+      // Check for foreign key constraint errors
+      if (error.message?.includes('foreign key constraint') || 
+          error.code === '23503') {
+        errorMessage = 'لا يمكن حذف هذا الموديل لأنه مرتبط بسيارات موجودة في النظام';
+      }
+      
       toast({
         title: 'فشل الحذف',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -253,7 +261,13 @@ const ModelsList = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف هذا الموديل؟ لن يمكن التراجع عن هذا الإجراء.
+              هل أنت متأكد من حذف هذا الموديل؟
+              <span className="block mt-2 text-destructive font-medium">
+                ⚠️ تحذير: سيتم حذف جميع السيارات المرتبطة بهذا الموديل تلقائياً.
+              </span>
+              <span className="block mt-1 text-muted-foreground text-sm">
+                لن يمكن التراجع عن هذا الإجراء.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

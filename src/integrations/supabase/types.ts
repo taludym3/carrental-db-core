@@ -469,7 +469,7 @@ export type Database = {
           branch_description_en: string | null
           branch_id: string
           branch_images: string[] | null
-          color_id: string
+          color_id: string | null
           created_at: string
           daily_price: number
           discount_percentage: number | null
@@ -498,7 +498,7 @@ export type Database = {
           branch_description_en?: string | null
           branch_id: string
           branch_images?: string[] | null
-          color_id: string
+          color_id?: string | null
           created_at?: string
           daily_price: number
           discount_percentage?: number | null
@@ -527,7 +527,7 @@ export type Database = {
           branch_description_en?: string | null
           branch_id?: string
           branch_images?: string[] | null
-          color_id?: string
+          color_id?: string | null
           created_at?: string
           daily_price?: number
           discount_percentage?: number | null
