@@ -28,8 +28,8 @@ type Car = {
   ownership_price: number | null;
   branch_images: string[];
   branches: { id: string } | null;
-  models: { name: string; name_en: string; default_image_url: string | null; brands: { name: string; name_en: string } | null } | null;
-  colors: { name: string; name_en: string; hex_code: string } | null;
+  car_models: { name_en: string; name_ar: string | null; default_image_url: string | null; car_brands: { name_en: string; name_ar: string | null } | null } | null;
+  car_colors: { name_en: string; name_ar: string | null; hex_code: string | null } | null;
 };
 
 const statusColors = {
@@ -84,8 +84,8 @@ export default function CarsList() {
         .select(`
           *,
           branches(id),
-          models(name, name_en, default_image_url, brands(name, name_en)),
-          colors(name, name_en, hex_code)
+          car_models(name_en, name_ar, default_image_url, car_brands(name_en, name_ar)),
+          car_colors(name_en, name_ar, hex_code)
         `)
         .order("created_at", { ascending: false });
 
@@ -108,7 +108,7 @@ export default function CarsList() {
   };
 
   const fetchBrands = async () => {
-    const { data } = await supabase.from("brands").select("id, name, name_en").order("name");
+    const { data } = await supabase.from("car_brands").select("id, name_en, name_ar").order("name_en");
     setBrands(data || []);
   };
 
@@ -119,10 +119,10 @@ export default function CarsList() {
     if (searchTerm) {
       filtered = filtered.filter(
         (car) =>
-          car.models?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.models?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.models?.brands?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.models?.brands?.name_en.toLowerCase().includes(searchTerm.toLowerCase())
+          car.car_models?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          car.car_models?.name_ar?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          car.car_models?.car_brands?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          car.car_models?.car_brands?.name_ar?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -221,7 +221,7 @@ export default function CarsList() {
       const { data } = supabase.storage.from("car-images").getPublicUrl(car.branch_images[0]);
       return data.publicUrl;
     }
-    return car.models?.default_image_url || "/placeholder.svg";
+    return car.car_models?.default_image_url || "/placeholder.svg";
   };
 
   if (loading) {
@@ -331,22 +331,22 @@ export default function CarsList() {
                 <TableCell>
                   <img
                     src={getImageUrl(car)}
-                    alt={car.models?.name || ""}
+                    alt={car.car_models?.name_en || ""}
                     className="w-16 h-16 object-cover rounded"
                   />
                 </TableCell>
                 <TableCell>
                   <div>
                     <div className="font-medium">
-                      {car.models?.brands?.name} {car.models?.name}
+                      {car.car_models?.car_brands?.name_ar || car.car_models?.car_brands?.name_en} {car.car_models?.name_ar || car.car_models?.name_en}
                     </div>
-                    {car.colors && (
+                    {car.car_colors && (
                       <div className="flex items-center gap-2 mt-1">
                         <div
                           className="w-4 h-4 rounded border"
-                          style={{ backgroundColor: car.colors.hex_code }}
+                          style={{ backgroundColor: car.car_colors.hex_code || "#000" }}
                         />
-                        <span className="text-sm text-muted-foreground">{car.colors.name}</span>
+                        <span className="text-sm text-muted-foreground">{car.car_colors.name_ar || car.car_colors.name_en}</span>
                       </div>
                     )}
                   </div>

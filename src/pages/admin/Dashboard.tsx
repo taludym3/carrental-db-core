@@ -17,6 +17,10 @@ import ColorsList from './colors/ColorsList';
 import ColorsAdd from './colors/ColorsAdd';
 import ColorDetails from './colors/ColorDetails';
 import ColorEdit from './colors/ColorEdit';
+import CarsList from './cars/CarsList';
+import CarsAdd from './cars/CarsAdd';
+import CarDetails from './cars/CarDetails';
+import CarEdit from './cars/CarEdit';
 
 const AdminDashboard = () => {
   return (
@@ -39,6 +43,10 @@ const AdminDashboard = () => {
         <Route path="colors/add" element={<ColorsAdd />} />
         <Route path="colors/:id" element={<ColorDetails />} />
         <Route path="colors/:id/edit" element={<ColorEdit />} />
+        <Route path="cars" element={<CarsList />} />
+        <Route path="cars/add" element={<CarsAdd />} />
+        <Route path="cars/:id" element={<CarDetails />} />
+        <Route path="cars/:id/edit" element={<CarEdit />} />
       </Route>
     </Routes>
   );

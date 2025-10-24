@@ -47,8 +47,8 @@ export default function CarDetails() {
         .select(`
           *,
           branches(id),
-          models(name, name_en, default_image_url, brands(name, name_en, logo_url)),
-          colors(name, name_en, hex_code)
+          car_models(name_en, name_ar, default_image_url, car_brands(name_en, name_ar, logo_url)),
+          car_colors(name_en, name_ar, hex_code)
         `)
         .eq("id", id)
         .single();
@@ -136,7 +136,7 @@ export default function CarDetails() {
     <div className="space-y-6">
       <PageHeader
         title="تفاصيل السيارة"
-        description={`${car.models?.brands?.name} ${car.models?.name}`}
+        description={`${car.car_models?.car_brands?.name_ar || car.car_models?.car_brands?.name_en || ""} ${car.car_models?.name_ar || car.car_models?.name_en || ""}`}
         action={
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate("/admin/cars")}>
@@ -182,8 +182,8 @@ export default function CarDetails() {
                 </Carousel>
               ) : (
                 <img
-                  src={car.models?.default_image_url || "/placeholder.svg"}
-                  alt={car.models?.name}
+                  src={car.car_models?.default_image_url || "/placeholder.svg"}
+                  alt={car.car_models?.name_en || ""}
                   className="w-full h-96 object-cover rounded-lg"
                 />
               )}
@@ -200,25 +200,25 @@ export default function CarDetails() {
                 <div>
                   <p className="text-sm text-muted-foreground">البراند</p>
                   <div className="flex items-center gap-2 mt-1">
-                    {car.models?.brands?.logo_url && (
-                      <img src={car.models.brands.logo_url} alt="" className="h-6 w-6 object-contain" />
+                    {car.car_models?.car_brands?.logo_url && (
+                      <img src={car.car_models.car_brands.logo_url} alt="" className="h-6 w-6 object-contain" />
                     )}
-                    <p className="font-medium">{car.models?.brands?.name}</p>
+                    <p className="font-medium">{car.car_models?.car_brands?.name_ar || car.car_models?.car_brands?.name_en}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">الموديل</p>
-                  <p className="font-medium">{car.models?.name}</p>
+                  <p className="font-medium">{car.car_models?.name_ar || car.car_models?.name_en}</p>
                 </div>
-                {car.colors && (
+                {car.car_colors && (
                   <div>
                     <p className="text-sm text-muted-foreground">اللون</p>
                     <div className="flex items-center gap-2 mt-1">
                       <div
                         className="w-6 h-6 rounded border"
-                        style={{ backgroundColor: car.colors.hex_code }}
+                        style={{ backgroundColor: car.car_colors.hex_code || "#000" }}
                       />
-                      <p className="font-medium">{car.colors.name}</p>
+                      <p className="font-medium">{car.car_colors.name_ar || car.car_colors.name_en}</p>
                     </div>
                   </div>
                 )}

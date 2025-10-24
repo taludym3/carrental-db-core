@@ -74,14 +74,14 @@ export default function CarEdit() {
 
   const fetchModels = async () => {
     const { data } = await supabase
-      .from("models")
-      .select("*, brands(name, name_en)")
-      .order("name");
+      .from("car_models")
+      .select("*, car_brands(name_en, name_ar)")
+      .order("name_en");
     setModels(data || []);
   };
 
   const fetchColors = async () => {
-    const { data } = await supabase.from("colors").select("*").order("name");
+    const { data } = await supabase.from("car_colors").select("*").order("name_en");
     setColors(data || []);
   };
 
@@ -96,15 +96,30 @@ export default function CarEdit() {
       if (error) throw error;
 
       form.reset({
-        ...data,
+        branch_id: data.branch_id,
+        model_id: data.model_id,
         color_id: data.color_id || undefined,
+        status: data.status as any,
+        rental_types: data.rental_types as any,
+        seats: data.seats,
         mileage: data.mileage || undefined,
+        fuel_type: data.fuel_type as any,
+        transmission: data.transmission as any,
+        is_new: data.is_new,
+        quantity: data.quantity,
+        available_quantity: data.available_quantity,
+        daily_price: data.daily_price,
         weekly_price: data.weekly_price || undefined,
         monthly_price: data.monthly_price || undefined,
         ownership_price: data.ownership_price || undefined,
+        discount_percentage: data.discount_percentage,
         offer_expires_at: data.offer_expires_at || undefined,
+        features: data.features || [],
+        features_en: data.features_en || [],
+        features_ar: data.features_ar || [],
         branch_description_en: data.branch_description_en || undefined,
         branch_description_ar: data.branch_description_ar || undefined,
+        branch_images: data.branch_images || [],
       });
     } catch (error: any) {
       toast({
@@ -123,7 +138,7 @@ export default function CarEdit() {
     try {
       const { error } = await supabase
         .from("cars")
-        .update(values)
+        .update(values as any)
         .eq("id", id);
 
       if (error) throw error;
@@ -212,7 +227,7 @@ export default function CarEdit() {
                         <SelectContent>
                           {models.map((model) => (
                             <SelectItem key={model.id} value={model.id}>
-                              {model.brands?.name} {model.name}
+                              {model.car_brands?.name_ar || model.car_brands?.name_en} {model.name_ar || model.name_en}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -240,9 +255,9 @@ export default function CarEdit() {
                               <div className="flex items-center gap-2">
                                 <div
                                   className="w-4 h-4 rounded border"
-                                  style={{ backgroundColor: color.hex_code }}
+                                  style={{ backgroundColor: color.hex_code || "#000" }}
                                 />
-                                {color.name}
+                                {color.name_ar || color.name_en}
                               </div>
                             </SelectItem>
                           ))}

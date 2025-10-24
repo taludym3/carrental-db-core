@@ -91,14 +91,14 @@ export default function CarsAdd() {
 
   const fetchModels = async () => {
     const { data } = await supabase
-      .from("models")
-      .select("*, brands(name, name_en)")
-      .order("name");
+      .from("car_models")
+      .select("*, car_brands(name_en, name_ar)")
+      .order("name_en");
     setModels(data || []);
   };
 
   const fetchColors = async () => {
-    const { data } = await supabase.from("colors").select("*").order("name");
+    const { data } = await supabase.from("car_colors").select("*").order("name_en");
     setColors(data || []);
   };
 
@@ -106,7 +106,7 @@ export default function CarsAdd() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("cars").insert([values]);
+      const { error } = await supabase.from("cars").insert([values as any]);
 
       if (error) throw error;
 
@@ -189,7 +189,7 @@ export default function CarsAdd() {
                         <SelectContent>
                           {models.map((model) => (
                             <SelectItem key={model.id} value={model.id}>
-                              {model.brands?.name} {model.name}
+                              {model.car_brands?.name_ar || model.car_brands?.name_en} {model.name_ar || model.name_en}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -217,9 +217,9 @@ export default function CarsAdd() {
                               <div className="flex items-center gap-2">
                                 <div
                                   className="w-4 h-4 rounded border"
-                                  style={{ backgroundColor: color.hex_code }}
+                                  style={{ backgroundColor: color.hex_code || "#000" }}
                                 />
-                                {color.name}
+                                {color.name_ar || color.name_en}
                               </div>
                             </SelectItem>
                           ))}
