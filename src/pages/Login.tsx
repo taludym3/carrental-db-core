@@ -1,0 +1,126 @@
+import { useState, FormEvent } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { Mail, Lock, Loader2 } from 'lucide-react';
+
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = (location.state as any)?.from?.pathname || '/';
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('يرجى ملء جميع الحقول');
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+
+    if (error) {
+      toast.error('خطأ في تسجيل الدخول', {
+        description: error.message === 'Invalid login credentials' 
+          ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
+          : error.message
+      });
+    } else {
+      toast.success('تم تسجيل الدخول بنجاح');
+      navigate(from, { replace: true });
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="absolute top-8 right-8">
+        <div className="flex items-center gap-2">
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+            <span className="text-white font-bold text-xl">L</span>
+          </div>
+          <span className="text-2xl font-bold text-foreground">LEAGO</span>
+        </div>
+      </div>
+
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-3xl font-bold">تسجيل الدخول</CardTitle>
+          <CardDescription className="text-base">
+            أدخل بياناتك للدخول إلى لوحة التحكم
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-base">البريد الإلكتروني</Label>
+              <div className="relative">
+                <Mail className="absolute right-3 top-3 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="example@leago.com"
+                  className="pr-10 h-12 text-base"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  autoComplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-base">كلمة المرور</Label>
+              <div className="relative">
+                <Lock className="absolute right-3 top-3 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="pr-10 h-12 text-base"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-base font-semibold"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                  جاري التسجيل...
+                </>
+              ) : (
+                'تسجيل الدخول'
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p>نسيت كلمة المرور؟ تواصل مع المسؤول</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Login;
