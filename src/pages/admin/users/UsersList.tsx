@@ -57,7 +57,8 @@ export default function UsersList() {
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-users', search, roleFilter],
     queryFn: async () => {
-      let query = supabase
+      // 1. Get profiles with branches
+      let profilesQuery = supabase
         .from('profiles')
         .select(`
           id,
@@ -70,29 +71,40 @@ export default function UsersList() {
           branch_id,
           branches (
             name_ar
-          ),
-          user_roles (
-            role
           )
         `)
         .order('created_at', { ascending: false });
 
       if (search) {
-        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
+        profilesQuery = profilesQuery.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const { data: profiles, error: profilesError } = await profilesQuery;
+      if (profilesError) throw profilesError;
 
-      return data.map((user: any) => ({
-        id: user.user_id,
-        full_name: user.full_name,
-        email: user.email,
-        phone: user.phone,
-        created_at: user.created_at,
-        is_verified: user.is_verified,
-        role: user.user_roles?.[0]?.role || null,
-        branch_name: user.branches?.name_ar || null,
+      if (!profiles || profiles.length === 0) {
+        return [];
+      }
+
+      // 2. Get all user roles
+      const userIds = profiles.map(p => p.user_id);
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+      
+      if (rolesError) throw rolesError;
+
+      // 3. Merge data
+      return profiles.map((profile: any) => ({
+        id: profile.user_id,
+        full_name: profile.full_name,
+        email: profile.email,
+        phone: profile.phone,
+        created_at: profile.created_at,
+        is_verified: profile.is_verified,
+        role: roles?.find(r => r.user_id === profile.user_id)?.role || null,
+        branch_name: profile.branches?.name_ar || null,
       })) as UserWithRole[];
     },
   });
