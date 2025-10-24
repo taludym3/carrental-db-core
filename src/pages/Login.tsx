@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -114,8 +114,16 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>نسيت كلمة المرور؟ تواصل مع المسؤول</p>
+          <div className="mt-6 space-y-3">
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">ليس لديك حساب؟ </span>
+              <Link to="/register" className="text-primary font-semibold hover:underline">
+                إنشاء حساب جديد
+              </Link>
+            </div>
+            <div className="text-center text-sm text-muted-foreground">
+              <p>نسيت كلمة المرور؟ تواصل مع المسؤول</p>
+            </div>
           </div>
         </CardContent>
       </Card>
