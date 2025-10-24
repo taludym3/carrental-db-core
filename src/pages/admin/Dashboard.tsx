@@ -9,6 +9,10 @@ import BrandsList from './brands/BrandsList';
 import BrandsAdd from './brands/BrandsAdd';
 import BrandDetails from './brands/BrandDetails';
 import BrandEdit from './brands/BrandEdit';
+import ModelsList from './models/ModelsList';
+import ModelsAdd from './models/ModelsAdd';
+import ModelDetails from './models/ModelDetails';
+import ModelEdit from './models/ModelEdit';
 
 const AdminDashboard = () => {
   return (
@@ -23,6 +27,10 @@ const AdminDashboard = () => {
         <Route path="brands/add" element={<BrandsAdd />} />
         <Route path="brands/:id" element={<BrandDetails />} />
         <Route path="brands/:id/edit" element={<BrandEdit />} />
+        <Route path="models" element={<ModelsList />} />
+        <Route path="models/add" element={<ModelsAdd />} />
+        <Route path="models/:id" element={<ModelDetails />} />
+        <Route path="models/:id/edit" element={<ModelEdit />} />
       </Route>
     </Routes>
   );
