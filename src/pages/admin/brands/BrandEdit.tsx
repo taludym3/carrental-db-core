@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,11 +12,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { ImageUploader } from '@/components/admin/ImageUploader';
 
 const formSchema = z.object({
   name_en: z.string().min(1, 'الاسم بالإنجليزية مطلوب'),
   name_ar: z.string().optional(),
-  logo_url: z.string().url('يجب إدخال رابط صحيح').optional().or(z.literal('')),
   is_active: z.boolean().default(true),
 });
 
@@ -25,6 +25,7 @@ type FormValues = z.infer<typeof formSchema>;
 const BrandEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [uploadedLogoUrl, setUploadedLogoUrl] = useState<string | null>(null);
 
   const { data: brand, isLoading } = useQuery({
     queryKey: ['brand', id],
@@ -45,7 +46,6 @@ const BrandEdit = () => {
     defaultValues: {
       name_en: '',
       name_ar: '',
-      logo_url: '',
       is_active: true,
     },
   });
@@ -55,11 +55,19 @@ const BrandEdit = () => {
       form.reset({
         name_en: brand.name_en,
         name_ar: brand.name_ar || '',
-        logo_url: brand.logo_url || '',
         is_active: brand.is_active,
       });
+      setUploadedLogoUrl(brand.logo_url);
     }
   }, [brand, form]);
+
+  const handleImageDeleted = async () => {
+    setUploadedLogoUrl(null);
+    await supabase
+      .from('car_brands')
+      .update({ logo_url: null })
+      .eq('id', id);
+  };
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -68,7 +76,7 @@ const BrandEdit = () => {
         .update({
           name_en: values.name_en,
           name_ar: values.name_ar || null,
-          logo_url: values.logo_url || null,
+          logo_url: uploadedLogoUrl,
           is_active: values.is_active,
         })
         .eq('id', id);
@@ -142,22 +150,17 @@ const BrandEdit = () => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="logo_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رابط الشعار</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="https://example.com/logo.png" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <FormLabel>شعار العلامة التجارية</FormLabel>
+                <ImageUploader
+                  currentImageUrl={brand?.logo_url}
+                  bucket="brand-logos"
+                  folder="logos"
+                  onImageUploaded={setUploadedLogoUrl}
+                  onImageDeleted={handleImageDeleted}
+                  maxSizeMB={2}
+                />
+              </div>
 
               <FormField
                 control={form.control}

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,11 +11,11 @@ import { Switch } from '@/components/ui/switch';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { ArrowRight } from 'lucide-react';
+import { ImageUploader } from '@/components/admin/ImageUploader';
 
 const formSchema = z.object({
   name_en: z.string().min(1, 'الاسم بالإنجليزية مطلوب'),
   name_ar: z.string().optional(),
-  logo_url: z.string().url('يجب إدخال رابط صحيح').optional().or(z.literal('')),
   is_active: z.boolean().default(true),
 });
 
@@ -22,13 +23,13 @@ type FormValues = z.infer<typeof formSchema>;
 
 const BrandsAdd = () => {
   const navigate = useNavigate();
+  const [uploadedLogoUrl, setUploadedLogoUrl] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name_en: '',
       name_ar: '',
-      logo_url: '',
       is_active: true,
     },
   });
@@ -40,7 +41,7 @@ const BrandsAdd = () => {
         .insert({
           name_en: values.name_en,
           name_ar: values.name_ar || null,
-          logo_url: values.logo_url || null,
+          logo_url: uploadedLogoUrl,
           is_active: values.is_active,
         });
 
@@ -109,22 +110,15 @@ const BrandsAdd = () => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="logo_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رابط الشعار</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="https://example.com/logo.png" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <FormLabel>شعار العلامة التجارية</FormLabel>
+                <ImageUploader
+                  bucket="brand-logos"
+                  folder="logos"
+                  onImageUploaded={setUploadedLogoUrl}
+                  maxSizeMB={2}
+                />
+              </div>
 
               <FormField
                 control={form.control}
