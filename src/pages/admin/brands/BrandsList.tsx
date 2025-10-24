@@ -43,35 +43,64 @@ const BrandsList = () => {
     },
   });
 
+  // جلب الموديلات المرتبطة بالبراند المراد حذفه
+  const { data: relatedModels } = useQuery({
+    queryKey: ['brand-models', deleteId],
+    queryFn: async () => {
+      if (!deleteId) return [];
+      
+      const { data, error } = await supabase
+        .from('car_models')
+        .select('id, name_en, name_ar')
+        .eq('brand_id', deleteId);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!deleteId,
+  });
+
   const handleDelete = async () => {
     if (!deleteId) return;
 
     try {
-      const { error } = await supabase
+      // الخطوة 1: حذف جميع الموديلات المرتبطة أولاً
+      if (relatedModels && relatedModels.length > 0) {
+        const modelIds = relatedModels.map(m => m.id);
+        
+        // حذف الموديلات (سيؤدي هذا إلى حذف السيارات CASCADE تلقائياً)
+        const { error: modelsError } = await supabase
+          .from('car_models')
+          .delete()
+          .in('id', modelIds);
+        
+        if (modelsError) throw modelsError;
+      }
+      
+      // الخطوة 2: حذف البراند
+      const { error: brandError } = await supabase
         .from('car_brands')
         .delete()
         .eq('id', deleteId);
 
-      if (error) throw error;
+      if (brandError) throw brandError;
 
       toast({
         title: 'تم الحذف بنجاح',
-        description: 'تم حذف العلامة التجارية بنجاح',
+        description: relatedModels && relatedModels.length > 0
+          ? `تم حذف العلامة التجارية و ${relatedModels.length} موديل مرتبط بنجاح`
+          : 'تم حذف العلامة التجارية بنجاح',
       });
 
       refetch();
     } catch (error: any) {
       let errorMessage = 'حدث خطأ أثناء الحذف';
       
-      // Check for foreign key constraint errors
-      if (error.message?.includes('foreign key constraint') || 
-          error.code === '23503') {
-        errorMessage = 'لا يمكن حذف هذه العلامة التجارية لأنها مرتبطة بموديلات موجودة في النظام. يجب حذف الموديلات أولاً.';
-      }
+      console.error('Delete error:', error);
       
       toast({
         title: 'خطأ في الحذف',
-        description: errorMessage,
+        description: error.message || errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -190,10 +219,28 @@ const BrandsList = () => {
             <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
             <AlertDialogDescription>
               هل أنت متأكد من حذف هذه العلامة التجارية؟
-              <span className="block mt-2 text-amber-600 font-medium">
-                ⚠️ ملاحظة: إذا كان لهذه العلامة موديلات مرتبطة، سيفشل الحذف. يجب حذف الموديلات أولاً.
-              </span>
-              <span className="block mt-1 text-muted-foreground text-sm">
+              {relatedModels && relatedModels.length > 0 && (
+                <span className="block mt-2 bg-destructive/10 p-3 rounded-md">
+                  <span className="font-bold text-destructive">⚠️ تحذير مهم:</span>
+                  <span className="block mt-1">
+                    سيتم حذف <strong>{relatedModels.length}</strong> موديل مرتبط بهذه العلامة:
+                  </span>
+                  <ul className="list-disc list-inside mt-2 text-sm space-y-1">
+                    {relatedModels.slice(0, 5).map(model => (
+                      <li key={model.id}>{model.name_ar || model.name_en}</li>
+                    ))}
+                    {relatedModels.length > 5 && (
+                      <li className="text-muted-foreground">
+                        ... و {relatedModels.length - 5} موديل آخر
+                      </li>
+                    )}
+                  </ul>
+                  <span className="block mt-2 text-sm text-muted-foreground">
+                    سيتم أيضاً حذف جميع السيارات المرتبطة بهذه الموديلات تلقائياً.
+                  </span>
+                </span>
+              )}
+              <span className="block mt-2 text-muted-foreground text-sm">
                 لا يمكن التراجع عن هذا الإجراء.
               </span>
             </AlertDialogDescription>
