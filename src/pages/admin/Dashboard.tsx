@@ -13,6 +13,10 @@ import ModelsList from './models/ModelsList';
 import ModelsAdd from './models/ModelsAdd';
 import ModelDetails from './models/ModelDetails';
 import ModelEdit from './models/ModelEdit';
+import ColorsList from './colors/ColorsList';
+import ColorsAdd from './colors/ColorsAdd';
+import ColorDetails from './colors/ColorDetails';
+import ColorEdit from './colors/ColorEdit';
 
 const AdminDashboard = () => {
   return (
@@ -31,6 +35,10 @@ const AdminDashboard = () => {
         <Route path="models/add" element={<ModelsAdd />} />
         <Route path="models/:id" element={<ModelDetails />} />
         <Route path="models/:id/edit" element={<ModelEdit />} />
+        <Route path="colors" element={<ColorsList />} />
+        <Route path="colors/add" element={<ColorsAdd />} />
+        <Route path="colors/:id" element={<ColorDetails />} />
+        <Route path="colors/:id/edit" element={<ColorEdit />} />
       </Route>
     </Routes>
   );
