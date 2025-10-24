@@ -5,6 +5,10 @@ import UsersList from './users/UsersList';
 import UsersAdd from './users/UsersAdd';
 import UserDetails from './users/UserDetails';
 import UserEdit from './users/UserEdit';
+import BrandsList from './brands/BrandsList';
+import BrandsAdd from './brands/BrandsAdd';
+import BrandDetails from './brands/BrandDetails';
+import BrandEdit from './brands/BrandEdit';
 
 const AdminDashboard = () => {
   return (
@@ -15,6 +19,10 @@ const AdminDashboard = () => {
         <Route path="users/add" element={<UsersAdd />} />
         <Route path="users/:id" element={<UserDetails />} />
         <Route path="users/:id/edit" element={<UserEdit />} />
+        <Route path="brands" element={<BrandsList />} />
+        <Route path="brands/add" element={<BrandsAdd />} />
+        <Route path="brands/:id" element={<BrandDetails />} />
+        <Route path="brands/:id/edit" element={<BrandEdit />} />
       </Route>
     </Routes>
   );
