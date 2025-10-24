@@ -58,43 +58,32 @@ export default function UsersAdd() {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: UserFormData) => {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: data.email,
-        password: data.password,
-        email_confirm: true,
-        user_metadata: {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session');
+      }
+
+      const response = await supabase.functions.invoke('create-user', {
+        body: {
+          email: data.email,
+          password: data.password,
           full_name: data.full_name,
+          phone: data.phone || null,
+          role: data.role,
+          branch_id: data.branch_id || null,
         },
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Failed to create user');
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
 
-      // Update profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          full_name: data.full_name,
-          phone: data.phone || null,
-          email: data.email,
-          branch_id: data.branch_id || null,
-        })
-        .eq('user_id', authData.user.id);
+      if (!response.data?.success) {
+        throw new Error(response.data?.error || 'Failed to create user');
+      }
 
-      if (profileError) throw profileError;
-
-      // Assign role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: authData.user.id,
-          role: data.role,
-        });
-
-      if (roleError) throw roleError;
-
-      return authData.user;
+      return response.data.user;
     },
     onSuccess: () => {
       toast({
