@@ -223,9 +223,12 @@ export type Database = {
       branches: {
         Row: {
           created_at: string
+          description_ar: string | null
+          description_en: string | null
           email: string | null
           geom: unknown
           id: string
+          images: string[] | null
           is_active: boolean | null
           latitude: number | null
           location_ar: string | null
@@ -240,9 +243,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
           email?: string | null
           geom?: unknown
           id?: string
+          images?: string[] | null
           is_active?: boolean | null
           latitude?: number | null
           location_ar?: string | null
@@ -257,9 +263,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
           email?: string | null
           geom?: unknown
           id?: string
+          images?: string[] | null
           is_active?: boolean | null
           latitude?: number | null
           location_ar?: string | null
