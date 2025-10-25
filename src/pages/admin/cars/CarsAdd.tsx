@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
-import { FeaturesInput } from "@/components/admin/FeaturesInput";
+import { FeaturesMultiSelect } from "@/components/admin/FeaturesMultiSelect";
 import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
@@ -38,9 +38,9 @@ const formSchema = z.object({
   offer_expires_at: z.string().optional(),
   features_en: z.array(z.string()).default([]),
   features_ar: z.array(z.string()).default([]),
-  branch_description_en: z.string().optional(),
-  branch_description_ar: z.string().optional(),
-  branch_images: z.array(z.string()).default([]),
+  description_ar: z.string().optional(),
+  description_en: z.string().optional(),
+  additional_images: z.array(z.string()).default([]),
 });
 
 export default function CarsAdd() {
@@ -65,7 +65,7 @@ export default function CarsAdd() {
       discount_percentage: 0,
       features_en: [],
       features_ar: [],
-      branch_images: [],
+      additional_images: [],
     },
   });
 
@@ -83,7 +83,7 @@ export default function CarsAdd() {
   }, [quantity]);
 
   const fetchBranches = async () => {
-    const { data } = await supabase.from("branches").select("*").order("name");
+    const { data } = await supabase.from("branches").select("*").order("name_en");
     setBranches(data || []);
   };
 
@@ -162,7 +162,7 @@ export default function CarsAdd() {
                         <SelectContent>
                           {branches.map((branch) => (
                             <SelectItem key={branch.id} value={branch.id}>
-                              {branch.name}
+                              {branch.name_ar || branch.name_en}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -506,58 +506,35 @@ export default function CarsAdd() {
 
             <div>
               <h3 className="text-lg font-semibold mb-4">المميزات</h3>
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="features_en"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>مميزات بالإنجليزية</FormLabel>
-                      <FormControl>
-                        <FeaturesInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Add feature..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="features_ar"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>مميزات بالعربية</FormLabel>
-                      <FormControl>
-                        <FeaturesInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="أضف ميزة..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormItem>
+                <FormLabel>اختر المميزات</FormLabel>
+                <FormControl>
+                  <FeaturesMultiSelect
+                    selectedFeaturesAr={form.watch("features_ar")}
+                    selectedFeaturesEn={form.watch("features_en")}
+                    onChange={(ar, en) => {
+                      form.setValue("features_ar", ar);
+                      form.setValue("features_en", en);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             </div>
 
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">وصف الفرع</h3>
+              <h3 className="text-lg font-semibold mb-4">وصف السيارة</h3>
               <div className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="branch_description_en"
+                  name="description_en"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>الوصف بالإنجليزية</FormLabel>
                       <FormControl>
-                        <Textarea {...field} />
+                        <Textarea {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -566,12 +543,12 @@ export default function CarsAdd() {
 
                 <FormField
                   control={form.control}
-                  name="branch_description_ar"
+                  name="description_ar"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>الوصف بالعربية</FormLabel>
                       <FormControl>
-                        <Textarea {...field} />
+                        <Textarea {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -583,10 +560,10 @@ export default function CarsAdd() {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">صور الفرع</h3>
+              <h3 className="text-lg font-semibold mb-4">صور السيارة الإضافية</h3>
               <FormField
                 control={form.control}
-                name="branch_images"
+                name="additional_images"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -594,7 +571,7 @@ export default function CarsAdd() {
                         currentImages={field.value}
                         onImagesChange={field.onChange}
                         bucket="car-images"
-                        folder={`cars/${Date.now()}`}
+                        folder="cars"
                         maxImages={10}
                       />
                     </FormControl>

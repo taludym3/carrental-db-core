@@ -26,7 +26,7 @@ type Car = {
   weekly_price: number | null;
   monthly_price: number | null;
   ownership_price: number | null;
-  branch_images: string[];
+  additional_images: string[];
   branches: { id: string } | null;
   car_models: { name_en: string; name_ar: string | null; default_image_url: string | null; car_brands: { name_en: string; name_ar: string | null } | null } | null;
   car_colors: { name_en: string; name_ar: string | null; hex_code: string | null } | null;
@@ -183,8 +183,8 @@ export default function CarsList() {
 
     try {
       // Delete images from storage
-      if (selectedCar.branch_images?.length > 0) {
-        await supabase.storage.from("car-images").remove(selectedCar.branch_images);
+      if (selectedCar.additional_images?.length > 0) {
+        await supabase.storage.from("car-images").remove(selectedCar.additional_images);
       }
 
       // Delete car
@@ -217,8 +217,8 @@ export default function CarsList() {
   };
 
   const getImageUrl = (car: Car) => {
-    if (car.branch_images?.[0]) {
-      const { data } = supabase.storage.from("car-images").getPublicUrl(car.branch_images[0]);
+    if (car.additional_images?.[0]) {
+      const { data } = supabase.storage.from("car-images").getPublicUrl(car.additional_images[0]);
       return data.publicUrl;
     }
     return car.car_models?.default_image_url || "/placeholder.svg";
