@@ -488,14 +488,14 @@ export type Database = {
       }
       cars: {
         Row: {
+          additional_images: string[] | null
           available_quantity: number
-          branch_description_ar: string | null
-          branch_description_en: string | null
           branch_id: string
-          branch_images: string[] | null
           color_id: string | null
           created_at: string
           daily_price: number
+          description_ar: string | null
+          description_en: string | null
           discount_percentage: number | null
           features: string[] | null
           features_ar: string[] | null
@@ -517,14 +517,14 @@ export type Database = {
           weekly_price: number | null
         }
         Insert: {
+          additional_images?: string[] | null
           available_quantity?: number
-          branch_description_ar?: string | null
-          branch_description_en?: string | null
           branch_id: string
-          branch_images?: string[] | null
           color_id?: string | null
           created_at?: string
           daily_price: number
+          description_ar?: string | null
+          description_en?: string | null
           discount_percentage?: number | null
           features?: string[] | null
           features_ar?: string[] | null
@@ -546,14 +546,14 @@ export type Database = {
           weekly_price?: number | null
         }
         Update: {
+          additional_images?: string[] | null
           available_quantity?: number
-          branch_description_ar?: string | null
-          branch_description_en?: string | null
           branch_id?: string
-          branch_images?: string[] | null
           color_id?: string | null
           created_at?: string
           daily_price?: number
+          description_ar?: string | null
+          description_en?: string | null
           discount_percentage?: number | null
           features?: string[] | null
           features_ar?: string[] | null
