@@ -328,6 +328,30 @@ export type Database = {
         }
         Relationships: []
       }
+      car_features: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name_ar: string
+          name_en: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_ar: string
+          name_en: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_ar?: string
+          name_en?: string
+        }
+        Relationships: []
+      }
       car_models: {
         Row: {
           brand_id: string
