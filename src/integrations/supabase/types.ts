@@ -1173,7 +1173,6 @@ export type Database = {
         Args: { _car_id: string; _end_date?: string; _start_date: string }
         Returns: boolean
       }
-      cleanup_expired_bookings: { Args: never; Returns: number }
       complete_active_bookings: { Args: never; Returns: number }
       create_booking_atomic: {
         Args: {
@@ -1482,79 +1481,6 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      search_cars: {
-        Args: {
-          branch_ids?: string[]
-          brand_ids?: string[]
-          car_status_filter?: Database["public"]["Enums"]["car_status"][]
-          color_ids?: string[]
-          fuel_types?: string[]
-          include_discounted_only?: boolean
-          include_new_only?: boolean
-          max_distance_km?: number
-          max_price?: number
-          max_seats?: number
-          min_price?: number
-          min_seats?: number
-          model_ids?: string[]
-          p_rental_types?: Database["public"]["Enums"]["rental_type"][]
-          page_number?: number
-          page_size?: number
-          price_type?: string
-          search_language?: string
-          search_query?: string
-          sort_by?: string
-          transmission_types?: string[]
-          user_lat?: number
-          user_lon?: number
-        }
-        Returns: {
-          actual_available_quantity: number
-          additional_images: string[]
-          available_quantity: number
-          best_offer_discount: number
-          best_offer_id: string
-          best_offer_name_ar: string
-          best_offer_name_en: string
-          branch_id: string
-          branch_location_ar: string
-          branch_location_en: string
-          branch_name_ar: string
-          branch_name_en: string
-          branch_phone: string
-          brand_logo_url: string
-          brand_name_ar: string
-          brand_name_en: string
-          car_id: string
-          color_hex_code: string
-          color_name_ar: string
-          color_name_en: string
-          daily_price: number
-          description_ar: string
-          description_en: string
-          discount_percentage: number
-          distance_km: number
-          features_ar: string[]
-          features_en: string[]
-          fuel_type: string
-          is_new: boolean
-          main_image_url: string
-          mileage: number
-          model_name_ar: string
-          model_name_en: string
-          model_year: number
-          monthly_price: number
-          offer_expires_at: string
-          ownership_price: number
-          quantity: number
-          rental_types: Database["public"]["Enums"]["rental_type"][]
-          search_rank: number
-          seats: number
-          status: Database["public"]["Enums"]["car_status"]
-          transmission: string
-          weekly_price: number
-        }[]
       }
       send_notification: {
         Args: {
