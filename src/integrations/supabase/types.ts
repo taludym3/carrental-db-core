@@ -218,6 +218,13 @@ export type Database = {
             referencedRelation: "cars"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bookings_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_availability"
+            referencedColumns: ["car_id"]
+          },
         ]
       }
       branches: {
@@ -492,6 +499,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cars"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_offers_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_availability"
+            referencedColumns: ["car_id"]
           },
         ]
       }
@@ -962,6 +976,28 @@ export type Database = {
       }
     }
     Views: {
+      cars_availability: {
+        Row: {
+          available_quantity: number | null
+          branch_id: string | null
+          brand_name_ar: string | null
+          brand_name_en: string | null
+          car_id: string | null
+          model_name_ar: string | null
+          model_name_en: string | null
+          status: Database["public"]["Enums"]["car_status"] | null
+          total_quantity: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cars_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geography_columns: {
         Row: {
           coord_dimension: number | null
@@ -1173,6 +1209,13 @@ export type Database = {
         Args: { _car_id: string; _end_date?: string; _start_date: string }
         Returns: boolean
       }
+      cleanup_expired_bookings: {
+        Args: never
+        Returns: {
+          cleaned_count: number
+          restored_cars: string[]
+        }[]
+      }
       complete_active_bookings: { Args: never; Returns: number }
       create_booking_atomic: {
         Args: {
@@ -1289,6 +1332,15 @@ export type Database = {
           }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      fix_availability_inconsistencies: {
+        Args: never
+        Returns: {
+          actual_availability: number
+          car_id: string
+          expected_availability: number
+          needs_attention: boolean
+        }[]
+      }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }
@@ -1427,6 +1479,27 @@ export type Database = {
           manager_name: string
           name: string
           updated_at: string
+        }[]
+      }
+      get_nearest_cars: {
+        Args: { _limit?: number; _user_lat: number; _user_lon: number }
+        Returns: {
+          actual_available_quantity: number
+          branch_location: string
+          branch_name: string
+          car_brand: string
+          car_color: string
+          car_id: string
+          car_model: string
+          daily_price: number
+          discount_percentage: number
+          distance_km: number
+          distance_meters: number
+          fuel_type: string
+          is_new: boolean
+          main_image_url: string
+          seats: number
+          transmission: string
         }[]
       }
       get_user_role: {
