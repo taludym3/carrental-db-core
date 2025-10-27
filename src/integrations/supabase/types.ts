@@ -1396,6 +1396,39 @@ export type Database = {
         Returns: number
       }
       get_branch_cars_count: { Args: { _branch_id: string }; Returns: number }
+      get_branch_employee_list: {
+        Args: { _branch_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_verified: boolean
+          phone: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }[]
+      }
+      get_branch_employees_count: {
+        Args: { _branch_id: string }
+        Returns: number
+      }
+      get_branch_statistics: {
+        Args: { _branch_id: string }
+        Returns: {
+          active_bookings_count: number
+          cars_count: number
+          created_at: string
+          employees_count: number
+          id: string
+          is_active: boolean
+          location: string
+          manager_id: string
+          manager_name: string
+          name: string
+          updated_at: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
