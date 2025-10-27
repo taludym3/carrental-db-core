@@ -1169,6 +1169,35 @@ export type Database = {
             }
             Returns: string
           }
+      advanced_car_filter: {
+        Args: {
+          availability_end_date?: string
+          availability_start_date?: string
+          budget_range?: string
+          include_statistics?: boolean
+          max_offer_discount?: number
+          offers_only?: boolean
+          page_number?: number
+          page_size?: number
+          preferred_branches?: string[]
+          preferred_features?: string[]
+          required_features?: string[]
+          user_lat?: number
+          user_lon?: number
+        }
+        Returns: {
+          availability_score: number
+          branch_name: string
+          brand_name: string
+          car_id: string
+          daily_price: number
+          distance_km: number
+          feature_match_score: number
+          model_name: string
+          overall_score: number
+          year: number
+        }[]
+      }
       approve_booking: {
         Args: { p_booking_id: string; p_payment_deadline_hours?: number }
         Returns: {
@@ -1502,6 +1531,21 @@ export type Database = {
           transmission: string
         }[]
       }
+      get_search_statistics: {
+        Args: never
+        Returns: {
+          active_bookings: number
+          active_branches: number
+          active_brands: number
+          active_models: number
+          available_cars: number
+          total_bookings: number
+          total_branches: number
+          total_brands: number
+          total_cars: number
+          total_models: number
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -1593,6 +1637,37 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      search_branches: {
+        Args: {
+          is_active_filter?: boolean
+          max_distance_km?: number
+          page_number?: number
+          page_size?: number
+          search_language?: string
+          search_query?: string
+          user_lat?: number
+          user_lon?: number
+        }
+        Returns: {
+          branch_id: string
+          cars_count: number
+          description_ar: string
+          description_en: string
+          distance_km: number
+          email: string
+          images: string[]
+          latitude: number
+          location_ar: string
+          location_en: string
+          longitude: number
+          manager_name: string
+          name_ar: string
+          name_en: string
+          phone: string
+          search_rank: number
+          working_hours: string
+        }[]
+      }
       search_cars: {
         Args: {
           branch_ids?: string[]
@@ -1663,6 +1738,34 @@ export type Database = {
           status: Database["public"]["Enums"]["car_status"]
           transmission: string
           weekly_price: number
+        }[]
+      }
+      search_models: {
+        Args: {
+          brand_ids?: string[]
+          is_active_filter?: boolean
+          max_year?: number
+          min_year?: number
+          page_number?: number
+          page_size?: number
+          search_language?: string
+          search_query?: string
+        }
+        Returns: {
+          available_cars_count: number
+          brand_logo_url: string
+          brand_name_ar: string
+          brand_name_en: string
+          default_image_url: string
+          description_ar: string
+          description_en: string
+          min_daily_price: number
+          model_id: string
+          name_ar: string
+          name_en: string
+          search_rank: number
+          specifications: Json
+          year: number
         }[]
       }
       send_notification: {
