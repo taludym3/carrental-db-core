@@ -1638,6 +1638,15 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      quick_search_suggestions: {
+        Args: { p_max_results_per_category?: number; p_search_query: string }
+        Returns: {
+          relevance_score: number
+          suggestion_id: string
+          suggestion_text: string
+          suggestion_type: string
+        }[]
+      }
       reject_booking: {
         Args: { p_booking_id: string; p_reason?: string }
         Returns: {
