@@ -1234,9 +1234,41 @@ export type Database = {
         Args: { _st: Database["public"]["Enums"]["booking_status"] }
         Returns: boolean
       }
+      calculate_booking_price: {
+        Args: {
+          p_car_id: string
+          p_discount_amount?: number
+          p_discount_percentage?: number
+          p_end_date: string
+          p_rental_type: Database["public"]["Enums"]["rental_type"]
+          p_start_date: string
+        }
+        Returns: {
+          base_price: number
+          booking_discount_amount: number
+          car_discount_amount: number
+          car_discount_percentage: number
+          final_amount: number
+          price_after_car_discount: number
+          subtotal: number
+          total_days: number
+          total_savings: number
+          total_savings_percentage: number
+        }[]
+      }
       check_car_availability: {
         Args: { _car_id: string; _end_date?: string; _start_date: string }
         Returns: boolean
+      }
+      check_expired_offers: {
+        Args: never
+        Returns: {
+          branch_name: string
+          car_id: string
+          discount_percentage: number
+          expired_at: string
+          model_name: string
+        }[]
       }
       cleanup_expired_bookings: {
         Args: never
@@ -1245,6 +1277,7 @@ export type Database = {
           restored_cars: string[]
         }[]
       }
+      cleanup_expired_offers: { Args: never; Returns: number }
       complete_active_bookings: { Args: never; Returns: number }
       create_booking_atomic: {
         Args: {
@@ -2373,6 +2406,14 @@ export type Database = {
           table_name: string
         }
         Returns: string
+      }
+      verify_system_health: {
+        Args: never
+        Returns: {
+          component: string
+          details: string
+          status: string
+        }[]
       }
     }
     Enums: {
