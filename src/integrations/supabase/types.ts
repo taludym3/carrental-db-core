@@ -1169,35 +1169,84 @@ export type Database = {
             }
             Returns: string
           }
-      advanced_car_filter: {
-        Args: {
-          availability_end_date?: string
-          availability_start_date?: string
-          budget_range?: string
-          include_statistics?: boolean
-          max_offer_discount?: number
-          offers_only?: boolean
-          page_number?: number
-          page_size?: number
-          preferred_branches?: string[]
-          preferred_features?: string[]
-          required_features?: string[]
-          user_lat?: number
-          user_lon?: number
-        }
-        Returns: {
-          availability_score: number
-          branch_name: string
-          brand_name: string
-          car_id: string
-          daily_price: number
-          distance_km: number
-          feature_match_score: number
-          model_name: string
-          overall_score: number
-          year: number
-        }[]
-      }
+      advanced_car_filter:
+        | {
+            Args: {
+              availability_end_date?: string
+              availability_start_date?: string
+              budget_range?: string
+              include_statistics?: boolean
+              max_offer_discount?: number
+              offers_only?: boolean
+              page_number?: number
+              page_size?: number
+              preferred_branches?: string[]
+              preferred_features?: string[]
+              required_features?: string[]
+              user_lat?: number
+              user_lon?: number
+            }
+            Returns: {
+              availability_score: number
+              branch_name: string
+              brand_name: string
+              car_id: string
+              daily_price: number
+              distance_km: number
+              feature_match_score: number
+              model_name: string
+              overall_score: number
+              year: number
+            }[]
+          }
+        | {
+            Args: {
+              p_branch_ids?: string[]
+              p_brand_ids?: string[]
+              p_color_ids?: string[]
+              p_end_date?: string
+              p_feature_ids?: string[]
+              p_fuel_type?: string[]
+              p_has_discount?: boolean
+              p_is_new?: boolean
+              p_limit?: number
+              p_max_price?: number
+              p_max_seats?: number
+              p_max_year?: number
+              p_min_price?: number
+              p_min_seats?: number
+              p_min_year?: number
+              p_model_ids?: string[]
+              p_offset?: number
+              p_rental_types?: string[]
+              p_sort_by?: string
+              p_start_date?: string
+              p_transmission?: string[]
+            }
+            Returns: {
+              available_quantity: number
+              branch_name_ar: string
+              branch_name_en: string
+              brand_name_ar: string
+              brand_name_en: string
+              color_name_ar: string
+              color_name_en: string
+              daily_price: number
+              discount_percentage: number
+              features: string[]
+              final_price: number
+              fuel_type: string
+              id: string
+              model_name_ar: string
+              model_name_en: string
+              monthly_price: number
+              seats: number
+              total_results: number
+              transmission: string
+              weekly_price: number
+              year: number
+            }[]
+          }
       approve_booking: {
         Args: { p_booking_id: string; p_payment_deadline_hours?: number }
         Returns: {
@@ -1593,6 +1642,19 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_branch_manager: { Args: never; Returns: boolean }
+      log_availability_inconsistency: {
+        Args: { p_car_id: string; p_details: Json; p_issue_type: string }
+        Returns: undefined
+      }
+      log_security_event: {
+        Args: {
+          p_details: Json
+          p_event_type: string
+          p_identifier: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       make_booking_range: {
         Args: { _end: string; _start: string }
@@ -1679,137 +1741,222 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      search_branches: {
-        Args: {
-          is_active_filter?: boolean
-          max_distance_km?: number
-          page_number?: number
-          page_size?: number
-          search_language?: string
-          search_query?: string
-          user_lat?: number
-          user_lon?: number
-        }
-        Returns: {
-          branch_id: string
-          cars_count: number
-          description_ar: string
-          description_en: string
-          distance_km: number
-          email: string
-          images: string[]
-          latitude: number
-          location_ar: string
-          location_en: string
-          longitude: number
-          manager_name: string
-          name_ar: string
-          name_en: string
-          phone: string
-          search_rank: number
-          working_hours: string
-        }[]
-      }
-      search_cars: {
-        Args: {
-          branch_ids?: string[]
-          brand_ids?: string[]
-          car_status_filter?: Database["public"]["Enums"]["car_status"][]
-          color_ids?: string[]
-          fuel_types?: string[]
-          include_discounted_only?: boolean
-          include_new_only?: boolean
-          max_distance_km?: number
-          max_price?: number
-          max_seats?: number
-          min_price?: number
-          min_seats?: number
-          model_ids?: string[]
-          p_rental_types?: Database["public"]["Enums"]["rental_type"][]
-          page_number?: number
-          page_size?: number
-          price_type?: string
-          search_language?: string
-          search_query?: string
-          sort_by?: string
-          transmission_types?: string[]
-          user_lat?: number
-          user_lon?: number
-        }
-        Returns: {
-          additional_images: string[]
-          available_quantity: number
-          best_offer_discount: number
-          best_offer_id: string
-          best_offer_name_ar: string
-          best_offer_name_en: string
-          branch_id: string
-          branch_location_ar: string
-          branch_location_en: string
-          branch_name_ar: string
-          branch_name_en: string
-          branch_phone: string
-          brand_logo_url: string
-          brand_name_ar: string
-          brand_name_en: string
-          car_id: string
-          color_hex_code: string
-          color_name_ar: string
-          color_name_en: string
-          daily_price: number
-          description_ar: string
-          description_en: string
-          discount_percentage: number
-          distance_km: number
-          features_ar: string[]
-          features_en: string[]
-          fuel_type: string
-          is_new: boolean
-          main_image_url: string
-          mileage: number
-          model_name_ar: string
-          model_name_en: string
-          model_year: number
-          monthly_price: number
-          offer_expires_at: string
-          ownership_price: number
-          quantity: number
-          rental_types: Database["public"]["Enums"]["rental_type"][]
-          search_rank: number
-          seats: number
-          status: Database["public"]["Enums"]["car_status"]
-          transmission: string
-          weekly_price: number
-        }[]
-      }
-      search_models: {
-        Args: {
-          brand_ids?: string[]
-          is_active_filter?: boolean
-          max_year?: number
-          min_year?: number
-          page_number?: number
-          page_size?: number
-          search_language?: string
-          search_query?: string
-        }
-        Returns: {
-          available_cars_count: number
-          brand_logo_url: string
-          brand_name_ar: string
-          brand_name_en: string
-          default_image_url: string
-          description_ar: string
-          description_en: string
-          min_daily_price: number
-          model_id: string
-          name_ar: string
-          name_en: string
-          search_rank: number
-          specifications: Json
-          year: number
-        }[]
-      }
+      search_branches:
+        | {
+            Args: {
+              p_city?: string
+              p_has_available_cars?: boolean
+              p_limit?: number
+              p_offset?: number
+              p_search_query?: string
+            }
+            Returns: {
+              available_cars_count: number
+              email: string
+              id: string
+              location_ar: string
+              location_en: string
+              name_ar: string
+              name_en: string
+              phone: string
+              total_results: number
+              working_hours: string
+            }[]
+          }
+        | {
+            Args: {
+              is_active_filter?: boolean
+              max_distance_km?: number
+              page_number?: number
+              page_size?: number
+              search_language?: string
+              search_query?: string
+              user_lat?: number
+              user_lon?: number
+            }
+            Returns: {
+              branch_id: string
+              cars_count: number
+              description_ar: string
+              description_en: string
+              distance_km: number
+              email: string
+              images: string[]
+              latitude: number
+              location_ar: string
+              location_en: string
+              longitude: number
+              manager_name: string
+              name_ar: string
+              name_en: string
+              phone: string
+              search_rank: number
+              working_hours: string
+            }[]
+          }
+      search_cars:
+        | {
+            Args: {
+              p_branch_id?: string
+              p_brand_id?: string
+              p_fuel_type?: string
+              p_limit?: number
+              p_max_price?: number
+              p_min_price?: number
+              p_model_id?: string
+              p_offset?: number
+              p_rental_type?: string
+              p_search_query?: string
+              p_sort_by?: string
+              p_transmission?: string
+            }
+            Returns: {
+              available_quantity: number
+              branch_name_ar: string
+              branch_name_en: string
+              brand_name_ar: string
+              brand_name_en: string
+              color_name_ar: string
+              color_name_en: string
+              daily_price: number
+              fuel_type: string
+              id: string
+              model_name_ar: string
+              model_name_en: string
+              monthly_price: number
+              relevance_score: number
+              seats: number
+              status: string
+              total_results: number
+              transmission: string
+              weekly_price: number
+            }[]
+          }
+        | {
+            Args: {
+              branch_ids?: string[]
+              brand_ids?: string[]
+              car_status_filter?: Database["public"]["Enums"]["car_status"][]
+              color_ids?: string[]
+              fuel_types?: string[]
+              include_discounted_only?: boolean
+              include_new_only?: boolean
+              max_distance_km?: number
+              max_price?: number
+              max_seats?: number
+              min_price?: number
+              min_seats?: number
+              model_ids?: string[]
+              p_rental_types?: Database["public"]["Enums"]["rental_type"][]
+              page_number?: number
+              page_size?: number
+              price_type?: string
+              search_language?: string
+              search_query?: string
+              sort_by?: string
+              transmission_types?: string[]
+              user_lat?: number
+              user_lon?: number
+            }
+            Returns: {
+              additional_images: string[]
+              available_quantity: number
+              best_offer_discount: number
+              best_offer_id: string
+              best_offer_name_ar: string
+              best_offer_name_en: string
+              branch_id: string
+              branch_location_ar: string
+              branch_location_en: string
+              branch_name_ar: string
+              branch_name_en: string
+              branch_phone: string
+              brand_logo_url: string
+              brand_name_ar: string
+              brand_name_en: string
+              car_id: string
+              color_hex_code: string
+              color_name_ar: string
+              color_name_en: string
+              daily_price: number
+              description_ar: string
+              description_en: string
+              discount_percentage: number
+              distance_km: number
+              features_ar: string[]
+              features_en: string[]
+              fuel_type: string
+              is_new: boolean
+              main_image_url: string
+              mileage: number
+              model_name_ar: string
+              model_name_en: string
+              model_year: number
+              monthly_price: number
+              offer_expires_at: string
+              ownership_price: number
+              quantity: number
+              rental_types: Database["public"]["Enums"]["rental_type"][]
+              search_rank: number
+              seats: number
+              status: Database["public"]["Enums"]["car_status"]
+              transmission: string
+              weekly_price: number
+            }[]
+          }
+      search_models:
+        | {
+            Args: {
+              p_brand_id?: string
+              p_limit?: number
+              p_max_price?: number
+              p_min_price?: number
+              p_offset?: number
+              p_search_query?: string
+              p_year?: number
+            }
+            Returns: {
+              available_cars_count: number
+              brand_name_ar: string
+              brand_name_en: string
+              default_image_url: string
+              id: string
+              max_daily_price: number
+              min_daily_price: number
+              name_ar: string
+              name_en: string
+              total_results: number
+              year: number
+            }[]
+          }
+        | {
+            Args: {
+              brand_ids?: string[]
+              is_active_filter?: boolean
+              max_year?: number
+              min_year?: number
+              page_number?: number
+              page_size?: number
+              search_language?: string
+              search_query?: string
+            }
+            Returns: {
+              available_cars_count: number
+              brand_logo_url: string
+              brand_name_ar: string
+              brand_name_en: string
+              default_image_url: string
+              description_ar: string
+              description_en: string
+              min_daily_price: number
+              model_id: string
+              name_ar: string
+              name_en: string
+              search_rank: number
+              specifications: Json
+              year: number
+            }[]
+          }
       send_notification: {
         Args: {
           p_message_ar: string
