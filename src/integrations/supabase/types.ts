@@ -1247,54 +1247,6 @@ export type Database = {
               year: number
             }[]
           }
-        | {
-            Args: {
-              p_branch_ids?: string[]
-              p_brand_ids?: string[]
-              p_color_ids?: string[]
-              p_end_date?: string
-              p_feature_ids?: string[]
-              p_fuel_type?: string[]
-              p_has_discount?: boolean
-              p_is_new?: boolean
-              p_limit?: number
-              p_max_price?: number
-              p_max_seats?: number
-              p_max_year?: number
-              p_min_price?: number
-              p_min_seats?: number
-              p_min_year?: number
-              p_model_ids?: string[]
-              p_offset?: number
-              p_rental_types?: string[]
-              p_sort_by?: string
-              p_start_date?: string
-              p_transmission?: string[]
-            }
-            Returns: {
-              available_quantity: number
-              branch_name_ar: string
-              branch_name_en: string
-              brand_name_ar: string
-              brand_name_en: string
-              color_name_ar: string
-              color_name_en: string
-              daily_price: number
-              discount_percentage: number
-              features: string[]
-              final_price: number
-              fuel_type: string
-              id: string
-              model_name_ar: string
-              model_name_en: string
-              monthly_price: number
-              seats: number
-              total_results: number
-              transmission: string
-              weekly_price: number
-              year: number
-            }[]
-          }
       approve_booking: {
         Args: { p_booking_id: string; p_payment_deadline_hours?: number }
         Returns: {
