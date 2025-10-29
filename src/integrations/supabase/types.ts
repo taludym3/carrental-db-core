@@ -344,6 +344,49 @@ export type Database = {
         }
         Relationships: []
       }
+      car_feature_assignments: {
+        Row: {
+          car_id: string
+          created_at: string | null
+          feature_id: string
+          id: string
+        }
+        Insert: {
+          car_id: string
+          created_at?: string | null
+          feature_id: string
+          id?: string
+        }
+        Update: {
+          car_id?: string
+          created_at?: string | null
+          feature_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_feature_assignments_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_feature_assignments_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_availability"
+            referencedColumns: ["car_id"]
+          },
+          {
+            foreignKeyName: "car_feature_assignments_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "car_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_features: {
         Row: {
           created_at: string | null
@@ -1131,6 +1174,10 @@ export type Database = {
         Returns: unknown
       }
       _st_within: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      add_feature_to_car: {
+        Args: { p_car_id: string; p_feature_id: string }
+        Returns: undefined
+      }
       addauth: { Args: { "": string }; Returns: boolean }
       addgeometrycolumn:
         | {
@@ -1592,6 +1639,14 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_car_features: {
+        Args: { p_car_id: string }
+        Returns: {
+          feature_id: string
+          name_ar: string
+          name_en: string
+        }[]
+      }
       get_nearest_cars: {
         Args: { _limit?: number; _user_lat: number; _user_lon: number }
         Returns: {
@@ -1740,6 +1795,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      remove_feature_from_car: {
+        Args: { p_car_id: string; p_feature_id: string }
+        Returns: undefined
       }
       search_branches:
         | {
@@ -1968,6 +2027,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      set_car_features: {
+        Args: { p_car_id: string; p_feature_ids: string[] }
+        Returns: undefined
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
