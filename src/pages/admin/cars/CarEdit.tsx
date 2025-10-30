@@ -36,8 +36,7 @@ const formSchema = z.object({
   ownership_price: z.coerce.number().optional().nullable(),
   discount_percentage: z.coerce.number().min(0).max(100).default(0),
   offer_expires_at: z.string().optional().nullable(),
-  features_en: z.array(z.string()).default([]),
-  features_ar: z.array(z.string()).default([]),
+  feature_ids: z.array(z.string().uuid()).default([]),
   description_ar: z.string().optional().nullable(),
   description_en: z.string().optional().nullable(),
   additional_images: z.array(z.string()).default([]),
@@ -94,6 +93,10 @@ export default function CarEdit() {
 
       if (error) throw error;
 
+      const { data: features } = await supabase.rpc('get_car_features', {
+        p_car_id: id,
+      });
+
       form.reset({
         branch_id: data.branch_id,
         model_id: data.model_id,
@@ -113,8 +116,7 @@ export default function CarEdit() {
         ownership_price: data.ownership_price || undefined,
         discount_percentage: data.discount_percentage,
         offer_expires_at: data.offer_expires_at || undefined,
-        features_en: data.features_en || [],
-        features_ar: data.features_ar || [],
+        feature_ids: features?.map((f: any) => f.feature_id) || [],
         description_ar: data.description_ar || undefined,
         description_en: data.description_en || undefined,
         additional_images: data.additional_images || [],
@@ -134,12 +136,21 @@ export default function CarEdit() {
     setLoading(true);
 
     try {
+      const { feature_ids, ...carData } = values;
+      
       const { error } = await supabase
         .from("cars")
-        .update(values as any)
+        .update(carData as any)
         .eq("id", id);
 
       if (error) throw error;
+
+      const { error: featuresError } = await supabase.rpc('set_car_features', {
+        p_car_id: id,
+        p_feature_ids: feature_ids,
+      });
+
+      if (featuresError) throw featuresError;
 
       toast({
         title: "تم التحديث بنجاح",
@@ -548,12 +559,8 @@ export default function CarEdit() {
                 <FormLabel>اختر المميزات</FormLabel>
                 <FormControl>
                   <FeaturesMultiSelect
-                    selectedFeaturesAr={form.watch("features_ar") || []}
-                    selectedFeaturesEn={form.watch("features_en") || []}
-                    onChange={(ar, en) => {
-                      form.setValue("features_ar", ar);
-                      form.setValue("features_en", en);
-                    }}
+                    selectedFeatureIds={form.watch("feature_ids") || []}
+                    onChange={(ids) => form.setValue("feature_ids", ids)}
                   />
                 </FormControl>
                 <FormMessage />

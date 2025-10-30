@@ -11,15 +11,13 @@ interface Feature {
 }
 
 interface FeaturesMultiSelectProps {
-  selectedFeaturesAr: string[];
-  selectedFeaturesEn: string[];
-  onChange: (featuresAr: string[], featuresEn: string[]) => void;
+  selectedFeatureIds: string[];
+  onChange: (featureIds: string[]) => void;
   disabled?: boolean;
 }
 
 export const FeaturesMultiSelect = ({
-  selectedFeaturesAr,
-  selectedFeaturesEn,
+  selectedFeatureIds,
   onChange,
   disabled = false,
 }: FeaturesMultiSelectProps) => {
@@ -49,15 +47,9 @@ export const FeaturesMultiSelect = ({
 
   const handleToggle = (feature: Feature, checked: boolean) => {
     if (checked) {
-      onChange(
-        [...selectedFeaturesAr, feature.name_ar],
-        [...selectedFeaturesEn, feature.name_en]
-      );
+      onChange([...selectedFeatureIds, feature.id]);
     } else {
-      onChange(
-        selectedFeaturesAr.filter((f) => f !== feature.name_ar),
-        selectedFeaturesEn.filter((f) => f !== feature.name_en)
-      );
+      onChange(selectedFeatureIds.filter((id) => id !== feature.id));
     }
   };
 
@@ -80,7 +72,7 @@ export const FeaturesMultiSelect = ({
           <div key={feature.id} className="flex items-center space-x-2 space-x-reverse">
             <Checkbox
               id={feature.id}
-              checked={selectedFeaturesAr.includes(feature.name_ar)}
+              checked={selectedFeatureIds.includes(feature.id)}
               onCheckedChange={(checked) => handleToggle(feature, checked as boolean)}
               disabled={disabled}
             />

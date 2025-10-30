@@ -36,8 +36,7 @@ const formSchema = z.object({
   ownership_price: z.coerce.number().optional(),
   discount_percentage: z.coerce.number().min(0).max(100).default(0),
   offer_expires_at: z.string().optional(),
-  features_en: z.array(z.string()).default([]),
-  features_ar: z.array(z.string()).default([]),
+  feature_ids: z.array(z.string().uuid()).default([]),
   description_ar: z.string().optional(),
   description_en: z.string().optional(),
   additional_images: z.array(z.string()).default([]),
@@ -63,8 +62,7 @@ export default function CarsAdd() {
       available_quantity: 1,
       rental_types: ["daily"],
       discount_percentage: 0,
-      features_en: [],
-      features_ar: [],
+      feature_ids: [],
       additional_images: [],
     },
   });
@@ -104,9 +102,24 @@ export default function CarsAdd() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("cars").insert([values as any]);
+      const { feature_ids, ...carData } = values;
+      
+      const { data: car, error } = await supabase
+        .from("cars")
+        .insert([carData as any])
+        .select()
+        .single();
 
       if (error) throw error;
+
+      if (car && feature_ids.length > 0) {
+        const { error: featuresError } = await supabase.rpc('set_car_features', {
+          p_car_id: car.id,
+          p_feature_ids: feature_ids,
+        });
+
+        if (featuresError) throw featuresError;
+      }
 
       toast({
         title: "تم الإضافة بنجاح",
@@ -510,12 +523,8 @@ export default function CarsAdd() {
                 <FormLabel>اختر المميزات</FormLabel>
                 <FormControl>
                   <FeaturesMultiSelect
-                    selectedFeaturesAr={form.watch("features_ar")}
-                    selectedFeaturesEn={form.watch("features_en")}
-                    onChange={(ar, en) => {
-                      form.setValue("features_ar", ar);
-                      form.setValue("features_en", en);
-                    }}
+                    selectedFeatureIds={form.watch("feature_ids")}
+                    onChange={(ids) => form.setValue("feature_ids", ids)}
                   />
                 </FormControl>
                 <FormMessage />
