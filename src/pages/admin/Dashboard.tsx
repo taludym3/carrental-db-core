@@ -25,6 +25,8 @@ import FeaturesList from './features/FeaturesList';
 import FeaturesAdd from './features/FeaturesAdd';
 import FeatureDetails from './features/FeatureDetails';
 import FeatureEdit from './features/FeatureEdit';
+import BookingsList from './bookings/BookingsList';
+import BookingDetails from './bookings/BookingDetails';
 
 const AdminDashboard = () => {
   return (
@@ -55,6 +57,8 @@ const AdminDashboard = () => {
         <Route path="cars/add" element={<CarsAdd />} />
         <Route path="cars/:id" element={<CarDetails />} />
         <Route path="cars/:id/edit" element={<CarEdit />} />
+        <Route path="bookings" element={<BookingsList />} />
+        <Route path="bookings/:id" element={<BookingDetails />} />
       </Route>
     </Routes>
   );

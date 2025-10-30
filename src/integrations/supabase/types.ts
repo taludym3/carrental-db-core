@@ -1216,84 +1216,55 @@ export type Database = {
             }
             Returns: string
           }
-      advanced_car_filter:
-        | {
-            Args: {
-              availability_end_date?: string
-              availability_start_date?: string
-              budget_range?: string
-              include_statistics?: boolean
-              max_offer_discount?: number
-              offers_only?: boolean
-              page_number?: number
-              page_size?: number
-              preferred_branches?: string[]
-              preferred_features?: string[]
-              required_features?: string[]
-              user_lat?: number
-              user_lon?: number
-            }
-            Returns: {
-              availability_score: number
-              branch_name: string
-              brand_name: string
-              car_id: string
-              daily_price: number
-              distance_km: number
-              feature_match_score: number
-              model_name: string
-              overall_score: number
-              year: number
-            }[]
-          }
-        | {
-            Args: {
-              p_branch_ids?: string[]
-              p_brand_ids?: string[]
-              p_color_ids?: string[]
-              p_end_date?: string
-              p_feature_names?: string[]
-              p_fuel_type?: string[]
-              p_has_discount?: boolean
-              p_is_new?: boolean
-              p_limit?: number
-              p_max_price?: number
-              p_max_seats?: number
-              p_max_year?: number
-              p_min_price?: number
-              p_min_seats?: number
-              p_min_year?: number
-              p_model_ids?: string[]
-              p_offset?: number
-              p_rental_types?: string[]
-              p_sort_by?: string
-              p_start_date?: string
-              p_transmission?: string[]
-            }
-            Returns: {
-              available_quantity: number
-              branch_name_ar: string
-              branch_name_en: string
-              brand_name_ar: string
-              brand_name_en: string
-              color_name_ar: string
-              color_name_en: string
-              daily_price: number
-              discount_percentage: number
-              features: string[]
-              final_price: number
-              fuel_type: string
-              id: string
-              model_name_ar: string
-              model_name_en: string
-              monthly_price: number
-              seats: number
-              total_results: number
-              transmission: string
-              weekly_price: number
-              year: number
-            }[]
-          }
+      advanced_car_filter: {
+        Args: {
+          p_branch_ids?: string[]
+          p_brand_ids?: string[]
+          p_color_ids?: string[]
+          p_end_date?: string
+          p_feature_names?: string[]
+          p_fuel_type?: string[]
+          p_has_discount?: boolean
+          p_is_new?: boolean
+          p_limit?: number
+          p_max_price?: number
+          p_max_seats?: number
+          p_max_year?: number
+          p_min_price?: number
+          p_min_seats?: number
+          p_min_year?: number
+          p_model_ids?: string[]
+          p_offset?: number
+          p_rental_types?: string[]
+          p_sort_by?: string
+          p_start_date?: string
+          p_transmission?: string[]
+        }
+        Returns: {
+          available_quantity: number
+          branch_name_ar: string
+          branch_name_en: string
+          brand_name_ar: string
+          brand_name_en: string
+          color_name_ar: string
+          color_name_en: string
+          daily_price: number
+          discount_percentage: number
+          features_ar: string[]
+          features_en: string[]
+          final_price: number
+          fuel_type: string
+          id: string
+          model_name_ar: string
+          model_name_en: string
+          monthly_price: number
+          seats: number
+          total_results: number
+          transmission: string
+          weekly_price: number
+          year: number
+        }[]
+      }
       approve_booking: {
         Args: { p_booking_id: string; p_payment_deadline_hours?: number }
         Returns: {
@@ -1601,6 +1572,46 @@ export type Database = {
         Args: { _car_id: string; _end_date?: string; _start_date?: string }
         Returns: number
       }
+      get_booking_details: {
+        Args: { p_booking_id: string }
+        Returns: {
+          approved_at: string
+          approved_by_id: string
+          approved_by_name: string
+          booking_id: string
+          booking_status: Database["public"]["Enums"]["booking_status"]
+          branch_id: string
+          branch_location_ar: string
+          branch_name_ar: string
+          branch_phone: string
+          brand_name_ar: string
+          car_id: string
+          car_image_url: string
+          color_name_ar: string
+          created_at: string
+          customer_approved_documents_count: number
+          customer_bookings_count: number
+          customer_documents_count: number
+          customer_email: string
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          customer_verified: boolean
+          daily_rate: number
+          discount_amount: number
+          end_date: string
+          expires_at: string
+          final_amount: number
+          model_name_ar: string
+          model_year: number
+          notes: string
+          payment_reference: string
+          rental_type: Database["public"]["Enums"]["rental_type"]
+          start_date: string
+          total_amount: number
+          total_days: number
+        }[]
+      }
       get_branch_active_bookings_count: {
         Args: { _branch_id: string }
         Returns: number
@@ -1645,6 +1656,19 @@ export type Database = {
           feature_id: string
           name_ar: string
           name_en: string
+        }[]
+      }
+      get_customer_documents: {
+        Args: { p_customer_id: string }
+        Returns: {
+          created_at: string
+          document_id: string
+          document_status: Database["public"]["Enums"]["document_status"]
+          document_type: string
+          document_url: string
+          rejection_reason: string
+          verified_at: string
+          verified_by_name: string
         }[]
       }
       get_nearest_cars: {
@@ -1853,116 +1877,45 @@ export type Database = {
               working_hours: string
             }[]
           }
-      search_cars:
-        | {
-            Args: {
-              p_branch_id?: string
-              p_brand_id?: string
-              p_fuel_type?: string
-              p_limit?: number
-              p_max_price?: number
-              p_min_price?: number
-              p_model_id?: string
-              p_offset?: number
-              p_rental_type?: string
-              p_search_query?: string
-              p_sort_by?: string
-              p_transmission?: string
-            }
-            Returns: {
-              available_quantity: number
-              branch_name_ar: string
-              branch_name_en: string
-              brand_name_ar: string
-              brand_name_en: string
-              color_name_ar: string
-              color_name_en: string
-              daily_price: number
-              fuel_type: string
-              id: string
-              model_name_ar: string
-              model_name_en: string
-              monthly_price: number
-              relevance_score: number
-              seats: number
-              status: string
-              total_results: number
-              transmission: string
-              weekly_price: number
-            }[]
-          }
-        | {
-            Args: {
-              branch_ids?: string[]
-              brand_ids?: string[]
-              car_status_filter?: Database["public"]["Enums"]["car_status"][]
-              color_ids?: string[]
-              fuel_types?: string[]
-              include_discounted_only?: boolean
-              include_new_only?: boolean
-              max_distance_km?: number
-              max_price?: number
-              max_seats?: number
-              min_price?: number
-              min_seats?: number
-              model_ids?: string[]
-              p_rental_types?: Database["public"]["Enums"]["rental_type"][]
-              page_number?: number
-              page_size?: number
-              price_type?: string
-              search_language?: string
-              search_query?: string
-              sort_by?: string
-              transmission_types?: string[]
-              user_lat?: number
-              user_lon?: number
-            }
-            Returns: {
-              additional_images: string[]
-              available_quantity: number
-              best_offer_discount: number
-              best_offer_id: string
-              best_offer_name_ar: string
-              best_offer_name_en: string
-              branch_id: string
-              branch_location_ar: string
-              branch_location_en: string
-              branch_name_ar: string
-              branch_name_en: string
-              branch_phone: string
-              brand_logo_url: string
-              brand_name_ar: string
-              brand_name_en: string
-              car_id: string
-              color_hex_code: string
-              color_name_ar: string
-              color_name_en: string
-              daily_price: number
-              description_ar: string
-              description_en: string
-              discount_percentage: number
-              distance_km: number
-              features_ar: string[]
-              features_en: string[]
-              fuel_type: string
-              is_new: boolean
-              main_image_url: string
-              mileage: number
-              model_name_ar: string
-              model_name_en: string
-              model_year: number
-              monthly_price: number
-              offer_expires_at: string
-              ownership_price: number
-              quantity: number
-              rental_types: Database["public"]["Enums"]["rental_type"][]
-              search_rank: number
-              seats: number
-              status: Database["public"]["Enums"]["car_status"]
-              transmission: string
-              weekly_price: number
-            }[]
-          }
+      search_cars: {
+        Args: {
+          p_branch_id?: string
+          p_brand_id?: string
+          p_fuel_type?: string
+          p_limit?: number
+          p_max_price?: number
+          p_min_price?: number
+          p_model_id?: string
+          p_offset?: number
+          p_rental_type?: string
+          p_search_query?: string
+          p_sort_by?: string
+          p_transmission?: string
+        }
+        Returns: {
+          available_quantity: number
+          branch_name_ar: string
+          branch_name_en: string
+          brand_name_ar: string
+          brand_name_en: string
+          color_name_ar: string
+          color_name_en: string
+          daily_price: number
+          features_ar: string[]
+          features_en: string[]
+          fuel_type: string
+          id: string
+          model_name_ar: string
+          model_name_en: string
+          monthly_price: number
+          relevance_score: number
+          seats: number
+          status: string
+          total_results: number
+          transmission: string
+          weekly_price: number
+        }[]
+      }
       search_models:
         | {
             Args: {
@@ -2616,6 +2569,38 @@ export type Database = {
         Returns: unknown
       }
       unlockrows: { Args: { "": string }; Returns: number }
+      update_booking_notes: {
+        Args: { p_booking_id: string; p_notes: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          booking_range: unknown
+          branch_id: string
+          car_id: string
+          created_at: string
+          customer_id: string
+          daily_rate: number
+          discount_amount: number | null
+          end_date: string
+          expires_at: string | null
+          final_amount: number
+          id: string
+          notes: string | null
+          payment_reference: string | null
+          rental_type: Database["public"]["Enums"]["rental_type"]
+          start_date: string
+          status: Database["public"]["Enums"]["booking_status"] | null
+          total_amount: number
+          total_days: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       updategeometrysrid: {
         Args: {
           catalogn_name: string
