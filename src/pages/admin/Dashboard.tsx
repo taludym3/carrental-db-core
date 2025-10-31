@@ -29,6 +29,10 @@ import BookingsList from './bookings/BookingsList';
 import BookingDetails from './bookings/BookingDetails';
 import DocumentsList from './documents/DocumentsList';
 import DocumentDetails from './documents/DocumentDetails';
+import AnnouncementsList from './announcements/AnnouncementsList';
+import AnnouncementsAdd from './announcements/AnnouncementsAdd';
+import AnnouncementDetails from './announcements/AnnouncementDetails';
+import AnnouncementEdit from './announcements/AnnouncementEdit';
 
 const AdminDashboard = () => {
   return (
@@ -64,6 +68,11 @@ const AdminDashboard = () => {
           
           <Route path="documents" element={<DocumentsList />} />
           <Route path="documents/:id" element={<DocumentDetails />} />
+          
+          <Route path="announcements" element={<AnnouncementsList />} />
+          <Route path="announcements/add" element={<AnnouncementsAdd />} />
+          <Route path="announcements/:id" element={<AnnouncementDetails />} />
+          <Route path="announcements/:id/edit" element={<AnnouncementEdit />} />
       </Route>
     </Routes>
   );

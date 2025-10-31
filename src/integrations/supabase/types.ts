@@ -1597,6 +1597,25 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_active_announcements: {
+        Args: { p_branch_id?: string; p_limit?: number; p_offset?: number }
+        Returns: {
+          announcement_id: string
+          branch_id: string
+          branch_name_ar: string
+          created_at: string
+          created_by_name: string
+          description_ar: string
+          description_en: string
+          expires_at: string
+          image_url: string
+          is_featured: boolean
+          priority: Database["public"]["Enums"]["announcement_priority"]
+          title_ar: string
+          title_en: string
+          total_count: number
+        }[]
+      }
       get_actual_available_quantity: {
         Args: { _car_id: string; _end_date?: string; _start_date?: string }
         Returns: number
@@ -2669,6 +2688,31 @@ export type Database = {
       st_wrapx: {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
+      }
+      toggle_announcement_status: {
+        Args: { p_announcement_id: string }
+        Returns: {
+          branch_id: string | null
+          created_at: string
+          created_by: string
+          description_ar: string | null
+          description_en: string | null
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          priority: Database["public"]["Enums"]["announcement_priority"] | null
+          title_ar: string | null
+          title_en: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "announcements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       unlockrows: { Args: { "": string }; Returns: number }
       update_booking_notes: {
