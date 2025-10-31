@@ -29,7 +29,7 @@ export const RejectBookingDialog = ({ bookingId }: RejectBookingDialogProps) => 
     mutationFn: async () => {
       const { data, error } = await supabase.rpc('reject_booking', {
         p_booking_id: bookingId,
-        p_rejection_reason: reason
+        p_reason: reason
       });
       if (error) throw error;
       return data;

@@ -29,7 +29,7 @@ export const ApproveBookingDialog = ({ bookingId }: ApproveBookingDialogProps) =
     mutationFn: async () => {
       const { data, error } = await supabase.rpc('approve_booking', {
         p_booking_id: bookingId,
-        p_payment_valid_hours: hours
+        p_payment_deadline_hours: hours
       });
       if (error) throw error;
       return data;
