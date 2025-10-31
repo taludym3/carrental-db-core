@@ -1297,6 +1297,27 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_document: {
+        Args: { p_document_id: string }
+        Returns: {
+          created_at: string
+          document_type: string
+          document_url: string
+          id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["document_status"] | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "documents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       booking_status_consumes_capacity: {
         Args: { _st: Database["public"]["Enums"]["booking_status"] }
         Returns: boolean
@@ -1336,6 +1357,10 @@ export type Database = {
           expired_at: string
           model_name: string
         }[]
+      }
+      check_user_exists: {
+        Args: { _column: string; _value: string }
+        Returns: boolean
       }
       cleanup_expired_bookings: {
         Args: never
@@ -1388,6 +1413,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      create_user_with_phone: {
+        Args: { _full_name?: string; _phone: string }
+        Returns: string
       }
       current_user_branch_id: { Args: never; Returns: string }
       current_user_role: {
@@ -1671,6 +1700,28 @@ export type Database = {
           verified_by_name: string
         }[]
       }
+      get_documents_by_status: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_status?: Database["public"]["Enums"]["document_status"]
+        }
+        Returns: {
+          created_at: string
+          document_id: string
+          document_status: Database["public"]["Enums"]["document_status"]
+          document_type: string
+          document_url: string
+          rejection_reason: string
+          total_count: number
+          user_email: string
+          user_id: string
+          user_name: string
+          user_phone: string
+          verified_at: string
+          verified_by_name: string
+        }[]
+      }
       get_nearest_cars: {
         Args: { _limit?: number; _user_lat: number; _user_lon: number }
         Returns: {
@@ -1692,6 +1743,21 @@ export type Database = {
           transmission: string
         }[]
       }
+      get_pending_documents: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          created_at: string
+          document_id: string
+          document_status: Database["public"]["Enums"]["document_status"]
+          document_type: string
+          document_url: string
+          total_count: number
+          user_email: string
+          user_id: string
+          user_name: string
+          user_phone: string
+        }[]
+      }
       get_search_statistics: {
         Args: never
         Returns: {
@@ -1705,6 +1771,21 @@ export type Database = {
           total_brands: number
           total_cars: number
           total_models: number
+        }[]
+      }
+      get_user_by_phone: {
+        Args: { _phone: string }
+        Returns: {
+          age: number
+          branch_id: string
+          created_at: string
+          email: string
+          full_name: string
+          gender: string
+          is_verified: boolean
+          location: string
+          phone: string
+          user_id: string
         }[]
       }
       get_user_role: {
@@ -1816,6 +1897,27 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reject_document: {
+        Args: { p_document_id: string; p_reason: string }
+        Returns: {
+          created_at: string
+          document_type: string
+          document_url: string
+          id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["document_status"] | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "documents"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2601,6 +2703,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      update_user_profile: {
+        Args: {
+          _age?: number
+          _full_name?: string
+          _gender?: string
+          _location?: string
+          _phone?: string
+          _user_latitude?: number
+          _user_longitude?: number
+        }
+        Returns: undefined
+      }
       updategeometrysrid: {
         Args: {
           catalogn_name: string
@@ -2619,6 +2733,7 @@ export type Database = {
           status: string
         }[]
       }
+      verify_user_phone: { Args: { _phone: string }; Returns: string }
     }
     Enums: {
       announcement_priority: "normal" | "high"
