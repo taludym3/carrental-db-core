@@ -225,6 +225,13 @@ export type Database = {
             referencedRelation: "cars_availability"
             referencedColumns: ["car_id"]
           },
+          {
+            foreignKeyName: "bookings_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_with_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       branches: {
@@ -377,6 +384,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cars_availability"
             referencedColumns: ["car_id"]
+          },
+          {
+            foreignKeyName: "car_feature_assignments_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_with_details"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "car_feature_assignments_feature_id_fkey"
@@ -549,6 +563,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cars_availability"
             referencedColumns: ["car_id"]
+          },
+          {
+            foreignKeyName: "car_offers_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_with_details"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1041,6 +1062,54 @@ export type Database = {
           },
         ]
       }
+      cars_with_details: {
+        Row: {
+          actual_available_quantity: number | null
+          additional_images: string[] | null
+          available_quantity: number | null
+          branch_id: string | null
+          branch_name_ar: string | null
+          branch_name_en: string | null
+          brand_name_ar: string | null
+          brand_name_en: string | null
+          color_name_ar: string | null
+          color_name_en: string | null
+          created_at: string | null
+          daily_price: number | null
+          description_ar: string | null
+          description_en: string | null
+          discount_percentage: number | null
+          feature_ids: string[] | null
+          features_ar: string[] | null
+          features_en: string[] | null
+          fuel_type: string | null
+          has_active_offer: boolean | null
+          id: string | null
+          is_new: boolean | null
+          mileage: number | null
+          model_name_ar: string | null
+          model_name_en: string | null
+          monthly_price: number | null
+          offer_expires_at: string | null
+          ownership_price: number | null
+          quantity: number | null
+          rental_types: Database["public"]["Enums"]["rental_type"][] | null
+          seats: number | null
+          status: Database["public"]["Enums"]["car_status"] | null
+          transmission: string | null
+          updated_at: string | null
+          weekly_price: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cars_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geography_columns: {
         Row: {
           coord_dimension: number | null
@@ -1344,9 +1413,41 @@ export type Database = {
           total_savings_percentage: number
         }[]
       }
+      calculate_booking_price_preview: {
+        Args: {
+          p_car_id: string
+          p_end_date: string
+          p_rental_type: Database["public"]["Enums"]["rental_type"]
+          p_start_date: string
+        }
+        Returns: {
+          base_price: number
+          calculation_details: Json
+          discount_amount: number
+          discount_percentage: number
+          final_price: number
+          offer_expires_at: string
+          offer_valid: boolean
+          price_per_unit: number
+          total_amount: number
+          total_days: number
+        }[]
+      }
       check_car_availability: {
         Args: { _car_id: string; _end_date?: string; _start_date: string }
         Returns: boolean
+      }
+      check_car_availability_detailed: {
+        Args: { p_car_id: string; p_end_date: string; p_start_date: string }
+        Returns: {
+          actual_available: number
+          available_quantity: number
+          car_status: Database["public"]["Enums"]["car_status"]
+          conflicting_bookings: number
+          is_available: boolean
+          message: string
+          total_quantity: number
+        }[]
       }
       check_expired_offers: {
         Args: never
@@ -1358,10 +1459,20 @@ export type Database = {
           model_name: string
         }[]
       }
+      check_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_identifier: string
+          p_max_attempts?: number
+          p_window_minutes?: number
+        }
+        Returns: boolean
+      }
       check_user_exists: {
         Args: { _column: string; _value: string }
         Returns: boolean
       }
+      check_user_is_customer: { Args: never; Returns: boolean }
       cleanup_expired_bookings: {
         Args: never
         Returns: {
@@ -1370,7 +1481,20 @@ export type Database = {
         }[]
       }
       cleanup_expired_offers: { Args: never; Returns: number }
+      cleanup_old_rate_limits: { Args: never; Returns: number }
       complete_active_bookings: { Args: never; Returns: number }
+      complete_booking_payment_transaction: {
+        Args: {
+          p_booking_data: Json
+          p_booking_id: string
+          p_payment_reference: string
+          p_user_id: string
+        }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       create_booking_atomic: {
         Args: {
           p_branch_id: string
@@ -1413,6 +1537,20 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      create_customer_profile_safe: {
+        Args: {
+          p_age?: number
+          p_email: string
+          p_full_name?: string
+          p_gender?: string
+          p_location?: string
+          p_phone?: string
+          p_user_id: string
+          p_user_latitude?: number
+          p_user_longitude?: number
+        }
+        Returns: Json
       }
       create_user_with_phone: {
         Args: { _full_name?: string; _phone: string }
@@ -1660,6 +1798,14 @@ export type Database = {
           total_days: number
         }[]
       }
+      get_booking_for_payment_check: {
+        Args: { p_booking_id: string; p_user_id: string }
+        Returns: Json
+      }
+      get_booking_full_details: {
+        Args: { p_booking_id: string }
+        Returns: Json
+      }
       get_branch_active_bookings_count: {
         Args: { _branch_id: string }
         Returns: number
@@ -1706,6 +1852,8 @@ export type Database = {
           name_en: string
         }[]
       }
+      get_car_for_booking: { Args: { p_car_id: string }; Returns: Json }
+      get_current_user_role: { Args: never; Returns: string }
       get_customer_documents: {
         Args: { p_customer_id: string }
         Returns: {
@@ -1792,6 +1940,66 @@ export type Database = {
           total_models: number
         }[]
       }
+      get_user_booking_eligibility: {
+        Args: { p_user_id: string }
+        Returns: {
+          documents_status: Json
+          is_eligible: boolean
+          reason_code: string
+          reason_message_ar: string
+          reason_message_en: string
+          user_profile: Json
+        }[]
+      }
+      get_user_booking_stats: {
+        Args: { p_user_id?: string }
+        Returns: {
+          active: number
+          cancelled: number
+          completed: number
+          confirmed: number
+          expired: number
+          payment_pending: number
+          pending: number
+          total: number
+          total_spent: number
+        }[]
+      }
+      get_user_bookings: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_sort_by?: string
+          p_sort_order?: string
+          p_status?: string[]
+          p_user_id?: string
+        }
+        Returns: {
+          approved_at: string
+          approved_by: string
+          branch: Json
+          branch_id: string
+          car: Json
+          car_id: string
+          created_at: string
+          customer_id: string
+          daily_rate: number
+          discount_amount: number
+          end_date: string
+          expires_at: string
+          final_amount: number
+          id: string
+          notes: string
+          payment_reference: string
+          rental_type: Database["public"]["Enums"]["rental_type"]
+          start_date: string
+          status: Database["public"]["Enums"]["booking_status"]
+          total_amount: number
+          total_count: number
+          total_days: number
+          updated_at: string
+        }[]
+      }
       get_user_by_phone: {
         Args: { _phone: string }
         Returns: {
@@ -1812,6 +2020,19 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       gettransactionid: { Args: never; Returns: unknown }
+      handle_payment_failure_transaction: {
+        Args: {
+          p_booking_id: string
+          p_error_message: string
+          p_payment_id?: string
+          p_user_id: string
+        }
+        Returns: {
+          message: string
+          new_expires_at: string
+          success: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_role"]
@@ -1879,15 +2100,27 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
-      quick_search_suggestions: {
-        Args: { p_max_results_per_category?: number; p_search_query: string }
-        Returns: {
-          relevance_score: number
-          suggestion_id: string
-          suggestion_text: string
-          suggestion_type: string
-        }[]
-      }
+      quick_search_suggestions:
+        | {
+            Args: { _lang?: string; _limit?: number; _term: string }
+            Returns: {
+              detected_language: string
+              source: string
+              suggestion: string
+            }[]
+          }
+        | {
+            Args: {
+              p_max_results_per_category?: number
+              p_search_query: string
+            }
+            Returns: {
+              relevance_score: number
+              suggestion_id: string
+              suggestion_text: string
+              suggestion_type: string
+            }[]
+          }
       reject_booking: {
         Args: { p_booking_id: string; p_reason?: string }
         Returns: {
@@ -1944,6 +2177,10 @@ export type Database = {
       remove_feature_from_car: {
         Args: { p_car_id: string; p_feature_id: string }
         Returns: undefined
+      }
+      reset_rate_limit: {
+        Args: { p_action_type?: string; p_identifier: string }
+        Returns: number
       }
       search_branches:
         | {
@@ -2090,6 +2327,19 @@ export type Database = {
               year: number
             }[]
           }
+      search_user_bookings: {
+        Args: { p_limit?: number; p_search_query: string; p_user_id?: string }
+        Returns: {
+          branch_info: string
+          car_info: string
+          created_at: string
+          end_date: string
+          final_amount: number
+          id: string
+          start_date: string
+          status: Database["public"]["Enums"]["booking_status"]
+        }[]
+      }
       send_notification: {
         Args: {
           p_message_ar: string
@@ -2196,7 +2446,6 @@ export type Database = {
               maxdecimaldigits?: number
               nprefix?: string
               options?: number
-              version: number
             }
             Returns: string
           }
@@ -2207,6 +2456,7 @@ export type Database = {
               maxdecimaldigits?: number
               nprefix?: string
               options?: number
+              version: number
             }
             Returns: string
           }
@@ -2397,11 +2647,11 @@ export type Database = {
         Returns: unknown
       }
       st_generatepoints:
-        | { Args: { area: unknown; npoints: number }; Returns: unknown }
         | {
             Args: { area: unknown; npoints: number; seed: number }
             Returns: unknown
           }
+        | { Args: { area: unknown; npoints: number }; Returns: unknown }
       st_geogfromtext: { Args: { "": string }; Returns: unknown }
       st_geographyfromtext: { Args: { "": string }; Returns: unknown }
       st_geohash:
@@ -2689,6 +2939,15 @@ export type Database = {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
       }
+      test_rate_limit: {
+        Args: { p_action_type: string; p_identifier: string }
+        Returns: {
+          attempt_number: number
+          is_allowed: boolean
+          remaining_attempts: number
+          total_attempts: number
+        }[]
+      }
       toggle_announcement_status: {
         Args: { p_announcement_id: string }
         Returns: {
@@ -2747,6 +3006,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      update_booking_to_payment_pending: {
+        Args: { p_booking_id: string; p_user_id: string }
+        Returns: {
+          message: string
+          new_expires_at: string
+          success: boolean
+        }[]
+      }
+      update_document_status: {
+        Args: {
+          p_document_id: string
+          p_new_status: Database["public"]["Enums"]["document_status"]
+          p_reason?: string
+        }
+        Returns: {
+          created_at: string
+          document_type: string
+          document_url: string
+          id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["document_status"] | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "documents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      update_user_location: {
+        Args: {
+          _location: string
+          _user_latitude: number
+          _user_longitude: number
+        }
+        Returns: undefined
+      }
       update_user_profile: {
         Args: {
           _age?: number
@@ -2768,6 +3068,24 @@ export type Database = {
           table_name: string
         }
         Returns: string
+      }
+      validate_and_prepare_booking_for_payment: {
+        Args: { p_booking_id: string; p_user_id: string }
+        Returns: {
+          booking_data: Json
+          error_code: string
+          error_message: string
+          is_valid: boolean
+        }[]
+      }
+      validate_booking_dates: {
+        Args: { p_end_date: string; p_min_days?: number; p_start_date: string }
+        Returns: {
+          error_code: string
+          error_message_ar: string
+          error_message_en: string
+          is_valid: boolean
+        }[]
       }
       verify_system_health: {
         Args: never

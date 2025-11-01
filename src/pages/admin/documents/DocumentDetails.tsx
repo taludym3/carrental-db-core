@@ -10,6 +10,7 @@ import { ArrowRight, Download, ExternalLink, User, FileText } from 'lucide-react
 import { DocumentStatusBadge } from '@/pages/admin/bookings/components/DocumentStatusBadge';
 import { ApproveDocumentDialog } from './components/ApproveDocumentDialog';
 import { RejectDocumentDialog } from './components/RejectDocumentDialog';
+import { ChangeDocumentStatusDialog } from './components/ChangeDocumentStatusDialog';
 import { DocumentPreview } from './components/DocumentPreview';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -273,19 +274,26 @@ const DocumentDetails = () => {
         </CardContent>
       </Card>
 
-      {document.status === 'pending' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>الإجراءات</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-4">
-              <ApproveDocumentDialog documentId={document.id} />
-              <RejectDocumentDialog documentId={document.id} />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>الإجراءات</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            {document.status === 'pending' ? (
+              <>
+                <ApproveDocumentDialog documentId={document.id} />
+                <RejectDocumentDialog documentId={document.id} />
+              </>
+            ) : (
+              <ChangeDocumentStatusDialog 
+                documentId={document.id} 
+                currentStatus={document.status}
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
