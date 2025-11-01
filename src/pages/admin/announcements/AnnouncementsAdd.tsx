@@ -304,16 +304,15 @@ const AnnouncementsAdd = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="branch">الفرع</Label>
+                <Label htmlFor="branch">الفرع (اختياري)</Label>
                 <Select
-                  value={formData.branch_id}
+                  value={formData.branch_id || undefined}
                   onValueChange={(value) => setFormData({ ...formData, branch_id: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="جميع الفروع" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الفروع</SelectItem>
                     {branches?.map((branch) => (
                       <SelectItem key={branch.id} value={branch.id}>
                         {branch.name_ar}
@@ -321,6 +320,9 @@ const AnnouncementsAdd = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  إذا لم تختر فرع، سيظهر الإعلان لجميع الفروع
+                </p>
               </div>
 
               <div className="space-y-2">
