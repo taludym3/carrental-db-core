@@ -30,6 +30,7 @@ const AnnouncementEdit = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const { data: announcement, isLoading } = useQuery({
     queryKey: ['announcement-details', id],
@@ -79,57 +80,103 @@ const AnnouncementEdit = () => {
 
   const updateMutation = useMutation({
     mutationFn: async () => {
-      let imageUrl = currentImageUrl;
+      try {
+        let imageUrl = currentImageUrl;
 
-      // Upload new image if exists
-      if (imageFile) {
-        // Delete old image if exists
-        if (currentImageUrl) {
-          const oldImagePath = currentImageUrl.split('/').pop();
-          if (oldImagePath) {
-            await supabase.storage
-              .from('announcement-images')
-              .remove([oldImagePath]);
+        // Upload new image if exists
+        if (imageFile) {
+          // Validate image
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          if (imageFile.size > maxSize) {
+            throw new Error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
           }
+
+          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+          if (!allowedTypes.includes(imageFile.type)) {
+            throw new Error('نوع الملف غير مدعوم. استخدم JPG أو PNG أو WEBP');
+          }
+
+          setUploadProgress(10);
+
+          // Delete old image if exists
+          if (currentImageUrl) {
+            const oldImagePath = currentImageUrl.split('/').pop();
+            if (oldImagePath) {
+              console.log('Deleting old image:', oldImagePath);
+              await supabase.storage
+                .from('announcement-images')
+                .remove([oldImagePath]);
+            }
+          }
+
+          setUploadProgress(30);
+
+          const fileExt = imageFile.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `${fileName}`;
+
+          console.log('Uploading new image:', filePath);
+
+          const { error: uploadError, data: uploadData } = await supabase.storage
+            .from('announcement-images')
+            .upload(filePath, imageFile, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error('Image upload error:', uploadError);
+            throw new Error(`فشل رفع الصورة: ${uploadError.message}`);
+          }
+
+          console.log('Image uploaded successfully:', uploadData);
+          setUploadProgress(60);
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('announcement-images')
+            .getPublicUrl(filePath);
+
+          imageUrl = publicUrl;
+          console.log('New public URL:', publicUrl);
+          setUploadProgress(80);
         }
 
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        console.log('Updating announcement with data:', {
+          ...formData,
+          image_url: imageUrl
+        });
 
-        const { error: uploadError } = await supabase.storage
-          .from('announcement-images')
-          .upload(filePath, imageFile);
+        const { data, error } = await supabase
+          .from('announcements')
+          .update({
+            title_ar: formData.title_ar || formData.title_en,
+            title_en: formData.title_en,
+            description_ar: formData.description_ar || null,
+            description_en: formData.description_en || null,
+            image_url: imageUrl || null,
+            priority: formData.priority as any,
+            is_featured: formData.is_featured,
+            branch_id: formData.branch_id || null,
+            expires_at: formData.expires_at || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+          .select()
+          .single();
 
-        if (uploadError) throw uploadError;
+        if (error) {
+          console.error('Database update error:', error);
+          throw new Error(`فشل تحديث الإعلان: ${error.message}`);
+        }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('announcement-images')
-          .getPublicUrl(filePath);
-
-        imageUrl = publicUrl;
+        console.log('Announcement updated successfully:', data);
+        setUploadProgress(100);
+        return data;
+      } catch (error: any) {
+        console.error('Update announcement error:', error);
+        setUploadProgress(0);
+        throw error;
       }
-
-      const { data, error } = await supabase
-        .from('announcements')
-        .update({
-          title_ar: formData.title_ar || formData.title_en,
-          title_en: formData.title_en,
-          description_ar: formData.description_ar || null,
-          description_en: formData.description_en || null,
-          image_url: imageUrl || null,
-          priority: formData.priority as any,
-          is_featured: formData.is_featured,
-          branch_id: formData.branch_id || null,
-          expires_at: formData.expires_at || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
     },
     onSuccess: (data) => {
       toast.success('تم تحديث الإعلان بنجاح');
@@ -143,6 +190,22 @@ const AnnouncementEdit = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+        e.target.value = '';
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('نوع الملف غير مدعوم. استخدم JPG أو PNG أو WEBP');
+        e.target.value = '';
+        return;
+      }
+
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -240,7 +303,11 @@ const AnnouncementEdit = () => {
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/jpg"
                   onChange={handleImageChange}
+                  disabled={updateMutation.isPending}
                 />
+                <p className="text-xs text-muted-foreground">
+                  الحد الأقصى: 5 ميجابايت | الأنواع المدعومة: JPG, PNG, WEBP
+                </p>
                 {(imagePreview || currentImageUrl) && (
                   <div className="relative h-48 w-full rounded-lg overflow-hidden border">
                     <img
@@ -248,6 +315,20 @@ const AnnouncementEdit = () => {
                       alt="Preview"
                       className="h-full w-full object-cover"
                     />
+                  </div>
+                )}
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>جاري رفع الصورة...</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

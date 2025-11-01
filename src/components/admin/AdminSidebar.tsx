@@ -24,7 +24,7 @@ const menuItems = [
   { icon: FileText, label: 'الوثائق', href: '/admin/documents' },
   { icon: Calendar, label: 'الحجوزات', href: '/admin/bookings' },
   { icon: CreditCard, label: 'المدفوعات', href: '/admin/payments' },
-  { icon: Megaphone, label: 'الإعلانات', href: '/admin/advertisements' },
+  { icon: Megaphone, label: 'الإعلانات', href: '/admin/announcements' },
   { icon: Gift, label: 'العروض', href: '/admin/offers' },
   { icon: Wrench, label: 'الصيانة', href: '/admin/maintenance' },
   { icon: Bell, label: 'الإشعارات', href: '/admin/notifications' },

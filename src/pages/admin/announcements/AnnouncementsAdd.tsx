@@ -29,6 +29,7 @@ const AnnouncementsAdd = () => {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const { data: branches } = useQuery({
     queryKey: ['branches-list'],
@@ -45,47 +46,92 @@ const AnnouncementsAdd = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      let imageUrl = '';
+      try {
+        let imageUrl = '';
 
-      // Upload image if exists
-      if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        // Upload image if exists
+        if (imageFile) {
+          // Validate image
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          if (imageFile.size > maxSize) {
+            throw new Error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+          }
 
-        const { error: uploadError } = await supabase.storage
-          .from('announcement-images')
-          .upload(filePath, imageFile);
+          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+          if (!allowedTypes.includes(imageFile.type)) {
+            throw new Error('نوع الملف غير مدعوم. استخدم JPG أو PNG أو WEBP');
+          }
 
-        if (uploadError) throw uploadError;
+          setUploadProgress(10);
+          
+          const fileExt = imageFile.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `${fileName}`;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('announcement-images')
-          .getPublicUrl(filePath);
+          console.log('Uploading image to announcement-images bucket:', filePath);
+          setUploadProgress(30);
 
-        imageUrl = publicUrl;
+          const { error: uploadError, data: uploadData } = await supabase.storage
+            .from('announcement-images')
+            .upload(filePath, imageFile, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error('Image upload error:', uploadError);
+            throw new Error(`فشل رفع الصورة: ${uploadError.message}`);
+          }
+
+          console.log('Image uploaded successfully:', uploadData);
+          setUploadProgress(60);
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('announcement-images')
+            .getPublicUrl(filePath);
+
+          imageUrl = publicUrl;
+          console.log('Public URL generated:', publicUrl);
+          setUploadProgress(80);
+        }
+
+        console.log('Creating announcement with data:', {
+          ...formData,
+          image_url: imageUrl,
+          created_by: user?.id
+        });
+
+        const { data, error } = await supabase
+          .from('announcements')
+          .insert([{
+            title_ar: formData.title_ar || formData.title_en,
+            title_en: formData.title_en,
+            description_ar: formData.description_ar || null,
+            description_en: formData.description_en || null,
+            image_url: imageUrl || null,
+            priority: formData.priority as any,
+            is_featured: formData.is_featured,
+            branch_id: formData.branch_id || null,
+            expires_at: formData.expires_at || null,
+            created_by: user?.id,
+            is_active: true
+          }])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Database insert error:', error);
+          throw new Error(`فشل إنشاء الإعلان: ${error.message}`);
+        }
+
+        console.log('Announcement created successfully:', data);
+        setUploadProgress(100);
+        return data;
+      } catch (error: any) {
+        console.error('Create announcement error:', error);
+        setUploadProgress(0);
+        throw error;
       }
-
-      const { data, error } = await supabase
-        .from('announcements')
-        .insert([{
-          title_ar: formData.title_ar || formData.title_en,
-          title_en: formData.title_en,
-          description_ar: formData.description_ar || null,
-          description_en: formData.description_en || null,
-          image_url: imageUrl || null,
-          priority: formData.priority as any,
-          is_featured: formData.is_featured,
-          branch_id: formData.branch_id || null,
-          expires_at: formData.expires_at || null,
-          created_by: user?.id,
-          is_active: true
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
     },
     onSuccess: (data) => {
       toast.success('تم إنشاء الإعلان بنجاح');
@@ -99,6 +145,22 @@ const AnnouncementsAdd = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+        e.target.value = '';
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('نوع الملف غير مدعوم. استخدم JPG أو PNG أو WEBP');
+        e.target.value = '';
+        return;
+      }
+
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -191,7 +253,11 @@ const AnnouncementsAdd = () => {
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/jpg"
                   onChange={handleImageChange}
+                  disabled={createMutation.isPending}
                 />
+                <p className="text-xs text-muted-foreground">
+                  الحد الأقصى: 5 ميجابايت | الأنواع المدعومة: JPG, PNG, WEBP
+                </p>
                 {imagePreview && (
                   <div className="relative h-48 w-full rounded-lg overflow-hidden border">
                     <img
@@ -199,6 +265,20 @@ const AnnouncementsAdd = () => {
                       alt="Preview"
                       className="h-full w-full object-cover"
                     />
+                  </div>
+                )}
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>جاري رفع الصورة...</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
