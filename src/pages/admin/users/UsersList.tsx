@@ -21,7 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Search, Eye, Loader2 } from 'lucide-react';
+import { Plus, Search, Eye } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { UserCard } from './components/UserCard';
+import { UsersTableSkeleton } from './components/UsersTableSkeleton';
+import { UsersCardsSkeleton } from './components/UsersCardsSkeleton';
+import { UsersEmptyState } from './components/UsersEmptyState';
 
 type UserRole = 'admin' | 'branch' | 'branch_employee' | 'customer';
 
@@ -51,11 +57,13 @@ const roleColors: Record<UserRole, 'default' | 'secondary' | 'destructive'> = {
 };
 
 export default function UsersList() {
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const isMobile = useIsMobile();
+  const debouncedSearch = useDebouncedValue(searchInput, 500);
 
   const { data: users, isLoading } = useQuery({
-    queryKey: ['admin-users', search, roleFilter],
+    queryKey: ['admin-users', debouncedSearch, roleFilter],
     queryFn: async () => {
       // 1. Get profiles with branches
       let profilesQuery = supabase
@@ -75,8 +83,8 @@ export default function UsersList() {
         `)
         .order('created_at', { ascending: false });
 
-      if (search) {
-        profilesQuery = profilesQuery.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
+      if (debouncedSearch) {
+        profilesQuery = profilesQuery.or(`full_name.ilike.%${debouncedSearch}%,email.ilike.%${debouncedSearch}%,phone.ilike.%${debouncedSearch}%`);
       }
 
       const { data: profiles, error: profilesError } = await profilesQuery;
@@ -115,16 +123,16 @@ export default function UsersList() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">إدارة المستخدمين</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">إدارة المستخدمين</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             عرض وإدارة جميع المستخدمين في النظام
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="w-full sm:w-auto">
           <Link to="/admin/users/add">
             <Plus className="ml-2 h-4 w-4" />
             إضافة مستخدم
@@ -139,8 +147,8 @@ export default function UsersList() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="البحث بالاسم أو البريد أو الهاتف..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pr-10"
             />
           </div>
@@ -159,13 +167,30 @@ export default function UsersList() {
         </div>
       </Card>
 
-      {/* Table */}
-      <Card>
-        {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+      {/* Content */}
+      {isLoading ? (
+        isMobile ? (
+          <UsersCardsSkeleton />
         ) : (
+          <UsersTableSkeleton />
+        )
+      ) : filteredUsers?.length === 0 ? (
+        <Card>
+          <UsersEmptyState hasSearch={!!debouncedSearch} />
+        </Card>
+      ) : isMobile ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredUsers?.map((user) => (
+            <UserCard
+              key={user.id}
+              user={user}
+              roleLabels={roleLabels}
+              roleColors={roleColors}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card>
           <Table>
             <TableHeader>
               <TableRow>
@@ -180,52 +205,44 @@ export default function UsersList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    لا توجد بيانات
+              {filteredUsers?.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">
+                    {user.full_name || 'غير محدد'}
+                  </TableCell>
+                  <TableCell>{user.email || '-'}</TableCell>
+                  <TableCell>{user.phone || '-'}</TableCell>
+                  <TableCell>
+                    {user.role ? (
+                      <Badge variant={roleColors[user.role]}>
+                        {roleLabels[user.role]}
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">غير محدد</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>{user.branch_name || '-'}</TableCell>
+                  <TableCell>
+                    <Badge variant={user.is_verified ? 'default' : 'secondary'}>
+                      {user.is_verified ? 'موثق' : 'غير موثق'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(user.created_at).toLocaleDateString('ar-SA')}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to={`/admin/users/${user.id}`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                filteredUsers?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">
-                      {user.full_name || 'غير محدد'}
-                    </TableCell>
-                    <TableCell>{user.email || '-'}</TableCell>
-                    <TableCell>{user.phone || '-'}</TableCell>
-                    <TableCell>
-                      {user.role ? (
-                        <Badge variant={roleColors[user.role]}>
-                          {roleLabels[user.role]}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">غير محدد</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{user.branch_name || '-'}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.is_verified ? 'default' : 'secondary'}>
-                        {user.is_verified ? 'موثق' : 'غير موثق'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.created_at).toLocaleDateString('ar-SA')}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/admin/users/${user.id}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
-        )}
-      </Card>
+        </Card>
+      )}
     </div>
   );
 }
