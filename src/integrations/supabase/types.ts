@@ -3117,6 +3117,8 @@ export type Database = {
         | "booking_cancelled"
         | "booking_expired"
         | "booking_completed"
+        | "document_approved"
+        | "document_rejected"
       rental_type: "daily" | "weekly" | "monthly" | "ownership"
       user_role: "admin" | "branch" | "branch_employee" | "customer"
     }
@@ -3274,6 +3276,8 @@ export const Constants = {
         "booking_cancelled",
         "booking_expired",
         "booking_completed",
+        "document_approved",
+        "document_rejected",
       ],
       rental_type: ["daily", "weekly", "monthly", "ownership"],
       user_role: ["admin", "branch", "branch_employee", "customer"],

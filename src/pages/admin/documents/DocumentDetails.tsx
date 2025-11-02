@@ -14,6 +14,7 @@ import { ChangeDocumentStatusDialog } from './components/ChangeDocumentStatusDia
 import { DocumentPreview } from './components/DocumentPreview';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { toast } from '@/hooks/use-toast';
 
 const DocumentDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -256,19 +257,56 @@ const DocumentDetails = () => {
           <div className="flex gap-2 mt-4">
             <Button
               variant="outline"
-              onClick={() => window.open(document.document_url, '_blank')}
+              onClick={async () => {
+                try {
+                  const { data, error } = await supabase.storage
+                    .from('documents')
+                    .createSignedUrl(document.document_url, 3600);
+                  
+                  if (error) throw error;
+                  if (data) window.open(data.signedUrl, '_blank');
+                } catch (err) {
+                  console.error('Error opening document:', err);
+                  toast({
+                    title: 'خطأ',
+                    description: 'فشل فتح المستند',
+                    variant: 'destructive',
+                  });
+                }
+              }}
             >
               <ExternalLink className="h-4 w-4" />
               فتح في نافذة جديدة
             </Button>
             <Button
               variant="outline"
-              asChild
+              onClick={async () => {
+                try {
+                  const { data, error } = await supabase.storage
+                    .from('documents')
+                    .download(document.document_url);
+                  
+                  if (error) throw error;
+                  if (data) {
+                    const url = URL.createObjectURL(data);
+                    const a = window.document.createElement('a');
+                    a.href = url;
+                    a.download = `document-${document.id}`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }
+                } catch (err) {
+                  console.error('Error downloading document:', err);
+                  toast({
+                    title: 'خطأ',
+                    description: 'فشل تحميل المستند',
+                    variant: 'destructive',
+                  });
+                }
+              }}
             >
-              <a href={document.document_url} download={`document-${document.id}`}>
-                <Download className="h-4 w-4" />
-                تحميل المستند
-              </a>
+              <Download className="h-4 w-4" />
+              تحميل المستند
             </Button>
           </div>
         </CardContent>

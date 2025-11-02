@@ -106,7 +106,18 @@ export const CustomerDocumentsDialog = ({ customerId }: CustomerDocumentsDialogP
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={() => window.open(doc.document_url, '_blank')}
+                      onClick={async () => {
+                        try {
+                          const { data, error } = await supabase.storage
+                            .from('documents')
+                            .createSignedUrl(doc.document_url, 3600);
+                          
+                          if (error) throw error;
+                          if (data) window.open(data.signedUrl, '_blank');
+                        } catch (err) {
+                          console.error('Error opening document:', err);
+                        }
+                      }}
                     >
                       <ExternalLink className="h-4 w-4" />
                       عرض المستند
