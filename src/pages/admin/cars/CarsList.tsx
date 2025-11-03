@@ -457,7 +457,7 @@ export default function CarsList() {
           </TableHeader>
           <TableBody>
             {filteredCars.map((car) => (
-              <TableRow key={car.id}>
+              <TableRow key={car.id} className="items-center">
                 <TableCell>
                   <img
                     src={getImageUrl(car)}
@@ -465,7 +465,7 @@ export default function CarsList() {
                     className="w-16 h-16 object-cover rounded"
                   />
                 </TableCell>
-                <TableCell className="bg-sky-500/10">
+                <TableCell>
                   <div>
                     <div className="font-medium">
                       {car.brand_name_ar || car.brand_name_en} {car.model_name_ar || car.model_name_en}
