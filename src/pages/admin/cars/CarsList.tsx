@@ -465,9 +465,9 @@ export default function CarsList() {
                     className="w-16 h-16 object-cover rounded"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell className="bg-sky-500/10">
                   <div>
-                    <div className="font-medium bg-sky-500/10">
+                    <div className="font-medium">
                       {car.brand_name_ar || car.brand_name_en} {car.model_name_ar || car.model_name_en}
                     </div>
                     {car.color_hex_code && (
