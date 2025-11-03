@@ -444,7 +444,7 @@ export default function CarsList() {
       {/* Desktop Table View */}
       <div className="hidden lg:block bg-card rounded-lg border overflow-auto">
         <Table>
-          <TableHeader>
+          <TableHeader className="items-center">
             <TableRow>
               <TableHead>الصورة</TableHead>
               <TableHead>السيارة</TableHead>
