@@ -462,12 +462,12 @@ export default function CarsList() {
                   <img
                     src={getImageUrl(car)}
                     alt={car.model_name_en || ""}
-                    className="w-16 h-16 object-cover rounded bg-sky-500/10"
+                    className="w-16 h-16 object-cover rounded"
                   />
                 </TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-medium">
+                    <div className="font-medium bg-sky-500/10">
                       {car.brand_name_ar || car.brand_name_en} {car.model_name_ar || car.model_name_en}
                     </div>
                     {car.color_hex_code && (
