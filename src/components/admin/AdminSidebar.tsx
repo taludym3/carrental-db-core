@@ -1,12 +1,28 @@
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, Users, Building2, Car, Tag, Palette, PaintBucket,
-  FileText, Calendar, CreditCard, Megaphone, Gift, Wrench,
-  Bell, BarChart3, Shield, FileSearch, Settings, X
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  Car,
+  Tag,
+  Palette,
+  PaintBucket,
+  FileText,
+  Calendar,
+  CreditCard,
+  Megaphone,
+  Gift,
+  Wrench,
+  Bell,
+  BarChart3,
+  Shield,
+  FileSearch,
+  Settings,
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -14,24 +30,24 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/admin' },
-  { icon: Users, label: 'المستخدمين', href: '/admin/users' },
-  { icon: Building2, label: 'الفروع', href: '/admin/branches' },
-  { icon: Car, label: 'السيارات', href: '/admin/cars' },
-  { icon: Tag, label: 'العلامات التجارية', href: '/admin/brands' },
-  { icon: Palette, label: 'الموديلات', href: '/admin/models' },
-  { icon: PaintBucket, label: 'الألوان', href: '/admin/colors' },
-  { icon: FileText, label: 'الوثائق', href: '/admin/documents' },
-  { icon: Calendar, label: 'الحجوزات', href: '/admin/bookings' },
-  { icon: CreditCard, label: 'المدفوعات', href: '/admin/payments' },
-  { icon: Megaphone, label: 'الإعلانات', href: '/admin/announcements' },
-  { icon: Gift, label: 'العروض', href: '/admin/offers' },
-  { icon: Wrench, label: 'الصيانة', href: '/admin/maintenance' },
-  { icon: Bell, label: 'الإشعارات', href: '/admin/notifications' },
-  { icon: BarChart3, label: 'التقارير', href: '/admin/reports' },
-  { icon: Shield, label: 'الأمان', href: '/admin/security' },
-  { icon: FileSearch, label: 'سجل الأنشطة', href: '/admin/audit-logs' },
-  { icon: Settings, label: 'الإعدادات', href: '/admin/settings' },
+  { icon: LayoutDashboard, label: "لوحة التحكم", href: "/admin" },
+  { icon: Users, label: "المستخدمين", href: "/admin/users" },
+  { icon: Building2, label: "الفروع", href: "/admin/branches" },
+  { icon: Car, label: "السيارات", href: "/admin/cars" },
+  { icon: Tag, label: "العلامات التجارية", href: "/admin/brands" },
+  { icon: Palette, label: "الموديلات", href: "/admin/models" },
+  { icon: PaintBucket, label: "الألوان", href: "/admin/colors" },
+  { icon: FileText, label: "الوثائق", href: "/admin/documents" },
+  { icon: Calendar, label: "الحجوزات", href: "/admin/bookings" },
+  { icon: Megaphone, label: "الإعلانات", href: "/admin/announcements" },
+  { icon: CreditCard, label: "المدفوعات", href: "/admin/payments" },
+  { icon: Gift, label: "العروض", href: "/admin/offers" },
+  { icon: Wrench, label: "الصيانة", href: "/admin/maintenance" },
+  { icon: Bell, label: "الإشعارات", href: "/admin/notifications" },
+  { icon: BarChart3, label: "التقارير", href: "/admin/reports" },
+  { icon: Shield, label: "الأمان", href: "/admin/security" },
+  { icon: FileSearch, label: "سجل الأنشطة", href: "/admin/audit-logs" },
+  { icon: Settings, label: "الإعدادات", href: "/admin/settings" },
 ];
 
 export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
@@ -39,17 +55,14 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
 
   return (
     <>
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
 
-      <aside className={cn(
-        "fixed top-0 right-0 z-50 h-full w-64 bg-card border-l border-border transform transition-transform duration-300 ease-in-out",
-        isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
-      )}>
+      <aside
+        className={cn(
+          "fixed top-0 right-0 z-50 h-full w-64 bg-card border-l border-border transform transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0",
+        )}
+      >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <div className="flex items-center gap-2">
@@ -58,12 +71,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
               </div>
               <span className="text-xl font-bold">LEAGO</span>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              onClick={onClose}
-            >
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onClose}>
               <X className="h-5 w-5" />
             </Button>
           </div>
@@ -73,7 +81,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
-                
+
                 return (
                   <Link
                     key={item.href}
@@ -81,9 +89,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                     onClick={onClose}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground hover:bg-muted"
+                      isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted",
                     )}
                   >
                     <Icon className="h-5 w-5" />
