@@ -230,13 +230,9 @@ export default function CarsList() {
     );
   };
 
-  const getImageUrl = (car: Car) => {
-    if (car.additional_images?.[0]) {
-      const { data } = supabase.storage.from("car-images").getPublicUrl(car.additional_images[0]);
-      return data.publicUrl;
-    }
-    return car.default_image_url || "/placeholder.svg";
-  };
+const getImageUrl = (car: Car) => {
+  return car.default_image_url || "/placeholder.svg";
+};
 
   if (loading) {
     return <div className="p-8">جاري التحميل...</div>;
