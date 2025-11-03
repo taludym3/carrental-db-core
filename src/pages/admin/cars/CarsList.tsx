@@ -111,7 +111,7 @@ export default function CarsList() {
   const fetchCars = async () => {
     try {
       const { data, error } = await supabase
-        .from("cars_with_details")
+        .from("cars_with_details_admin")
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -444,7 +444,7 @@ export default function CarsList() {
       {/* Desktop Table View */}
       <div className="hidden lg:block bg-card rounded-lg border overflow-auto">
         <Table>
-          <TableHeader className="items-center">
+          <TableHeader>
             <TableRow>
               <TableHead>الصورة</TableHead>
               <TableHead>السيارة</TableHead>
@@ -457,7 +457,7 @@ export default function CarsList() {
           </TableHeader>
           <TableBody>
             {filteredCars.map((car) => (
-              <TableRow key={car.id} className="items-center">
+              <TableRow key={car.id}>
                 <TableCell>
                   <img
                     src={getImageUrl(car)}
