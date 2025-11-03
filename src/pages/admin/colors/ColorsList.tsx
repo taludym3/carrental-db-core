@@ -3,7 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Palette } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ColorCard } from './components/ColorCard';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -28,6 +31,7 @@ import { Badge } from '@/components/ui/badge';
 const ColorsList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: colors, isLoading, refetch } = useQuery({
@@ -93,14 +97,6 @@ const ColorsList = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">جاري التحميل...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -116,85 +112,121 @@ const ColorsList = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>اللون</TableHead>
-              <TableHead>الاسم بالإنجليزية</TableHead>
-              <TableHead>الاسم بالعربية</TableHead>
-              <TableHead>الكود السداسي</TableHead>
-              <TableHead>الحالة</TableHead>
-              <TableHead>تاريخ الإضافة</TableHead>
-              <TableHead className="text-center">الإجراءات</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {colors && colors.length > 0 ? (
-              colors.map((color) => (
-                <TableRow key={color.id}>
-                  <TableCell>
-                    <div
-                      className="w-10 h-10 rounded-md border-2 border-border shadow-sm"
-                      style={{ backgroundColor: color.hex_code || '#cccccc' }}
-                      title={color.hex_code || 'لا يوجد كود لوني'}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{color.name_en}</TableCell>
-                  <TableCell>{color.name_ar || '-'}</TableCell>
-                  <TableCell>
-                    <code className="px-2 py-1 bg-muted rounded text-sm">
-                      {color.hex_code || '-'}
-                    </code>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={color.is_active ? 'default' : 'secondary'}>
-                      {color.is_active ? 'نشط' : 'غير نشط'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(color.created_at).toLocaleDateString('ar-SA')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(`/admin/colors/${color.id}`)}
-                        title="عرض التفاصيل"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(`/admin/colors/${color.id}/edit`)}
-                        title="تعديل"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteId(color.id)}
-                        title="حذف"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
+      {isMobile ? (
+        <div className="space-y-4">
+          {isLoading ? (
+            Array(5).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-40 w-full" />
+            ))
+          ) : colors && colors.length > 0 ? (
+            colors.map((color) => (
+              <ColorCard
+                key={color.id}
+                color={color}
+                onView={() => navigate(`/admin/colors/${color.id}`)}
+                onEdit={() => navigate(`/admin/colors/${color.id}/edit`)}
+                onDelete={() => setDeleteId(color.id)}
+              />
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <Palette className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium mb-2">لا توجد ألوان</h3>
+              <p className="text-muted-foreground">لم يتم إضافة أي ألوان حتى الآن</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>اللون</TableHead>
+                <TableHead>الاسم بالإنجليزية</TableHead>
+                <TableHead>الاسم بالعربية</TableHead>
+                <TableHead>الكود السداسي</TableHead>
+                <TableHead>الحالة</TableHead>
+                <TableHead>تاريخ الإضافة</TableHead>
+                <TableHead className="text-center">الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array(7).fill(0).map((_, j) => (
+                      <TableCell key={j}>
+                        <Skeleton className="h-8 w-full" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : colors && colors.length > 0 ? (
+                colors.map((color) => (
+                  <TableRow key={color.id}>
+                    <TableCell>
+                      <div
+                        className="w-10 h-10 rounded-md border-2 border-border shadow-sm"
+                        style={{ backgroundColor: color.hex_code || '#cccccc' }}
+                        title={color.hex_code || 'لا يوجد كود لوني'}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{color.name_en}</TableCell>
+                    <TableCell>{color.name_ar || '-'}</TableCell>
+                    <TableCell>
+                      <code className="px-2 py-1 bg-muted rounded text-sm">
+                        {color.hex_code || '-'}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={color.is_active ? 'default' : 'secondary'}>
+                        {color.is_active ? 'نشط' : 'غير نشط'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(color.created_at).toLocaleDateString('ar-SA')}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/admin/colors/${color.id}`)}
+                          title="عرض التفاصيل"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/admin/colors/${color.id}/edit`)}
+                          title="تعديل"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteId(color.id)}
+                          title="حذف"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    لا توجد ألوان مضافة حتى الآن
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                  لا توجد ألوان مضافة حتى الآن
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>

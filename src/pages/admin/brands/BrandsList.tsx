@@ -5,11 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Eye, Pencil, Trash2, Tag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { BrandCard } from './components/BrandCard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Brand {
   id: string;
@@ -24,6 +27,7 @@ const BrandsList = () => {
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const { data: brands, isLoading, refetch } = useQuery({
     queryKey: ['admin-brands', search],
@@ -120,98 +124,142 @@ const BrandsList = () => {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>قائمة العلامات التجارية</CardTitle>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="بحث بالاسم..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pr-10"
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
+      {isMobile ? (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="relative">
+                <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="بحث بالاسم..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pr-10"
+                />
+              </div>
+            </CardHeader>
+          </Card>
+
           {isLoading ? (
-            <div className="text-center py-8">جاري التحميل...</div>
-          ) : !brands || brands.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              لا توجد علامات تجارية
-            </div>
+            Array(5).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-40 w-full" />
+            ))
+          ) : brands && brands.length > 0 ? (
+            brands.map((brand) => (
+              <BrandCard
+                key={brand.id}
+                brand={brand}
+                onView={() => navigate(`/admin/brands/${brand.id}`)}
+                onEdit={() => navigate(`/admin/brands/${brand.id}/edit`)}
+                onDelete={() => setDeleteId(brand.id)}
+              />
+            ))
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الشعار</TableHead>
-                  <TableHead>الاسم بالإنجليزية</TableHead>
-                  <TableHead>الاسم بالعربية</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>تاريخ الإنشاء</TableHead>
-                  <TableHead className="text-center">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {brands.map((brand) => (
-                  <TableRow key={brand.id}>
-                    <TableCell>
-                      {brand.logo_url ? (
-                        <img 
-                          src={brand.logo_url} 
-                          alt={brand.name_en}
-                          className="h-10 w-10 object-contain"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 bg-muted rounded flex items-center justify-center text-xs">
-                          لا يوجد
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{brand.name_en}</TableCell>
-                    <TableCell>{brand.name_ar || '-'}</TableCell>
-                    <TableCell>
-                      <Badge variant={brand.is_active ? 'default' : 'secondary'}>
-                        {brand.is_active ? 'نشط' : 'غير نشط'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(brand.created_at).toLocaleDateString('ar-SA')}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2 justify-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/admin/brands/${brand.id}`)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/admin/brands/${brand.id}/edit`)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteId(brand.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="text-center py-12">
+              <Tag className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium mb-2">لا توجد علامات تجارية</h3>
+              <p className="text-muted-foreground">لم يتم إضافة أي علامات تجارية حتى الآن</p>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>قائمة العلامات التجارية</CardTitle>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="بحث بالاسم..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pr-10"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">
+                {Array(5).fill(0).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : !brands || brands.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                لا توجد علامات تجارية
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>الشعار</TableHead>
+                    <TableHead>الاسم بالإنجليزية</TableHead>
+                    <TableHead>الاسم بالعربية</TableHead>
+                    <TableHead>الحالة</TableHead>
+                    <TableHead>تاريخ الإنشاء</TableHead>
+                    <TableHead className="text-center">الإجراءات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {brands.map((brand) => (
+                    <TableRow key={brand.id}>
+                      <TableCell>
+                        {brand.logo_url ? (
+                          <img 
+                            src={brand.logo_url} 
+                            alt={brand.name_en}
+                            className="h-10 w-10 object-contain"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 bg-muted rounded flex items-center justify-center text-xs">
+                            لا يوجد
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{brand.name_en}</TableCell>
+                      <TableCell>{brand.name_ar || '-'}</TableCell>
+                      <TableCell>
+                        <Badge variant={brand.is_active ? 'default' : 'secondary'}>
+                          {brand.is_active ? 'نشط' : 'غير نشط'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(brand.created_at).toLocaleDateString('ar-SA')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/admin/brands/${brand.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/admin/brands/${brand.id}/edit`)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeleteId(brand.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>

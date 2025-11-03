@@ -34,11 +34,26 @@ export default function CarDetails() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bookingsCount, setBookingsCount] = useState(0);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
+  const [actualAvailableQty, setActualAvailableQty] = useState<number>(0);
 
   useEffect(() => {
     fetchCar();
     fetchBookingsStats();
+    fetchActualAvailableQuantity();
   }, [id]);
+
+  const fetchActualAvailableQuantity = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_actual_available_quantity', {
+        _car_id: id
+      });
+
+      if (error) throw error;
+      setActualAvailableQty(data || 0);
+    } catch (error: any) {
+      console.error('Error fetching actual available quantity:', error);
+    }
+  };
 
   const fetchCar = async () => {
     try {
@@ -342,21 +357,21 @@ export default function CarDetails() {
                 <p className="text-2xl font-bold">{car.quantity}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">الكمية المتاحة</p>
-                <p className="text-2xl font-bold text-green-500">{car.available_quantity}</p>
+                <p className="text-sm text-muted-foreground">الكمية المتاحة الفعلية</p>
+                <p className="text-2xl font-bold text-green-500">{actualAvailableQty}</p>
               </div>
               <div className="bg-muted rounded-lg p-3">
                 <div className="flex justify-between text-sm mb-1">
                   <span>نسبة التوفر</span>
                   <span className="font-medium">
-                    {Math.round((car.available_quantity / car.quantity) * 100)}%
+                    {Math.round((actualAvailableQty / car.quantity) * 100)}%
                   </span>
                 </div>
                 <div className="w-full bg-background rounded-full h-2">
                   <div
                     className="bg-primary h-2 rounded-full transition-all"
                     style={{
-                      width: `${(car.available_quantity / car.quantity) * 100}%`,
+                      width: `${(actualAvailableQty / car.quantity) * 100}%`,
                     }}
                   />
                 </div>

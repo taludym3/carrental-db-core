@@ -15,21 +15,40 @@ import { Checkbox } from "@/components/ui/checkbox";
 type Car = {
   id: string;
   branch_id: string;
-  model_id: string;
+  model_id: string | null;
   color_id: string | null;
   status: string;
   rental_types: string[];
   seats: number;
   quantity: number;
+  actual_available_quantity: number;
   available_quantity: number;
   daily_price: number;
   weekly_price: number | null;
   monthly_price: number | null;
   ownership_price: number | null;
-  additional_images: string[];
-  branches: { id: string } | null;
-  car_models: { name_en: string; name_ar: string | null; default_image_url: string | null; car_brands: { name_en: string; name_ar: string | null } | null } | null;
-  car_colors: { name_en: string; name_ar: string | null; hex_code: string | null } | null;
+  additional_images: string[] | null;
+  branch_name_en: string | null;
+  branch_name_ar: string | null;
+  model_name_en: string | null;
+  model_name_ar: string | null;
+  brand_name_en: string | null;
+  brand_name_ar: string | null;
+  color_name_en: string | null;
+  color_name_ar: string | null;
+  color_hex_code: string | null;
+  default_image_url: string | null;
+  created_at?: string;
+  updated_at?: string;
+  is_new?: boolean;
+  mileage?: number;
+  fuel_type?: string;
+  transmission?: string;
+  discount_percentage?: number;
+  offer_expires_at?: string | null;
+  description_en?: string | null;
+  description_ar?: string | null;
+  feature_ids?: string[] | null;
 };
 
 const statusColors = {
@@ -80,17 +99,12 @@ export default function CarsList() {
   const fetchCars = async () => {
     try {
       const { data, error } = await supabase
-        .from("cars")
-        .select(`
-          *,
-          branches(id),
-          car_models(name_en, name_ar, default_image_url, car_brands(name_en, name_ar)),
-          car_colors(name_en, name_ar, hex_code)
-        `)
+        .from("cars_with_details")
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setCars(data || []);
+      setCars((data || []) as any[]);
     } catch (error: any) {
       toast({
         title: "خطأ في تحميل البيانات",
@@ -119,10 +133,10 @@ export default function CarsList() {
     if (searchTerm) {
       filtered = filtered.filter(
         (car) =>
-          car.car_models?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.car_models?.name_ar?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.car_models?.car_brands?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.car_models?.car_brands?.name_ar?.toLowerCase().includes(searchTerm.toLowerCase())
+          car.model_name_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          car.model_name_ar?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          car.brand_name_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          car.brand_name_ar?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -221,7 +235,7 @@ export default function CarsList() {
       const { data } = supabase.storage.from("car-images").getPublicUrl(car.additional_images[0]);
       return data.publicUrl;
     }
-    return car.car_models?.default_image_url || "/placeholder.svg";
+    return car.default_image_url || "/placeholder.svg";
   };
 
   if (loading) {
@@ -331,34 +345,34 @@ export default function CarsList() {
                 <TableCell>
                   <img
                     src={getImageUrl(car)}
-                    alt={car.car_models?.name_en || ""}
+                    alt={car.model_name_en || ""}
                     className="w-16 h-16 object-cover rounded"
                   />
                 </TableCell>
                 <TableCell>
                   <div>
                     <div className="font-medium">
-                      {car.car_models?.car_brands?.name_ar || car.car_models?.car_brands?.name_en} {car.car_models?.name_ar || car.car_models?.name_en}
+                      {car.brand_name_ar || car.brand_name_en} {car.model_name_ar || car.model_name_en}
                     </div>
-                    {car.car_colors && (
+                    {car.color_hex_code && (
                       <div className="flex items-center gap-2 mt-1">
                         <div
                           className="w-4 h-4 rounded border"
-                          style={{ backgroundColor: car.car_colors.hex_code || "#000" }}
+                          style={{ backgroundColor: car.color_hex_code || "#000" }}
                         />
-                        <span className="text-sm text-muted-foreground">{car.car_colors.name_ar || car.car_colors.name_en}</span>
+                        <span className="text-sm text-muted-foreground">{car.color_name_ar || car.color_name_en}</span>
                       </div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell>-</TableCell>
+                <TableCell>{car.branch_name_ar || car.branch_name_en || '-'}</TableCell>
                 <TableCell>
                   <Badge className={statusColors[car.status as keyof typeof statusColors]}>
                     {statusLabels[car.status as keyof typeof statusLabels]}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {car.available_quantity}/{car.quantity}
+                  {car.actual_available_quantity}/{car.quantity}
                 </TableCell>
                 <TableCell>{car.daily_price} ر.س</TableCell>
                 <TableCell>

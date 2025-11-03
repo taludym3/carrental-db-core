@@ -29,7 +29,6 @@ const formSchema = z.object({
   transmission: z.enum(["automatic", "manual"]),
   is_new: z.boolean().default(false),
   quantity: z.coerce.number().min(1, "الكمية مطلوبة"),
-  available_quantity: z.coerce.number().min(0),
   daily_price: z.coerce.number().min(0, "السعر اليومي مطلوب"),
   weekly_price: z.coerce.number().optional().nullable(),
   monthly_price: z.coerce.number().optional().nullable(),
@@ -109,7 +108,6 @@ export default function CarEdit() {
         transmission: data.transmission as any,
         is_new: data.is_new,
         quantity: data.quantity,
-        available_quantity: data.available_quantity,
         daily_price: data.daily_price,
         weekly_price: data.weekly_price || undefined,
         monthly_price: data.monthly_price || undefined,
@@ -408,21 +406,10 @@ export default function CarEdit() {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="available_quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الكمية المتاحة *</FormLabel>
-                      <FormControl>
-                        <Input type="number" min="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                💡 الكمية المتاحة سيتم حسابها تلقائياً بناءً على الحجوزات النشطة
+              </p>
             </div>
 
             <Separator />

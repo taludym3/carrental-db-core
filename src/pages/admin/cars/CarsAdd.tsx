@@ -29,7 +29,6 @@ const formSchema = z.object({
   transmission: z.enum(["automatic", "manual"]),
   is_new: z.boolean().default(false),
   quantity: z.coerce.number().min(1, "الكمية مطلوبة"),
-  available_quantity: z.coerce.number().min(0),
   daily_price: z.coerce.number().min(0, "السعر اليومي مطلوب"),
   weekly_price: z.coerce.number().optional(),
   monthly_price: z.coerce.number().optional(),
@@ -59,7 +58,6 @@ export default function CarsAdd() {
       transmission: "automatic",
       is_new: false,
       quantity: 1,
-      available_quantity: 1,
       rental_types: ["daily"],
       discount_percentage: 0,
       feature_ids: [],
@@ -68,17 +66,12 @@ export default function CarsAdd() {
   });
 
   const rentalTypes = form.watch("rental_types");
-  const quantity = form.watch("quantity");
 
   useEffect(() => {
     fetchBranches();
     fetchModels();
     fetchColors();
   }, []);
-
-  useEffect(() => {
-    form.setValue("available_quantity", quantity);
-  }, [quantity]);
 
   const fetchBranches = async () => {
     const { data } = await supabase.from("branches").select("*").order("name_en");
@@ -104,9 +97,15 @@ export default function CarsAdd() {
     try {
       const { feature_ids, ...carData } = values;
       
+      // تعيين available_quantity مساوية لـ quantity عند الإضافة
+      const carDataWithAvailableQty = {
+        ...carData,
+        available_quantity: carData.quantity
+      };
+      
       const { data: car, error } = await supabase
         .from("cars")
-        .insert([carData as any])
+        .insert([carDataWithAvailableQty as any])
         .select()
         .single();
 
@@ -372,21 +371,10 @@ export default function CarsAdd() {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="available_quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الكمية المتاحة *</FormLabel>
-                      <FormControl>
-                        <Input type="number" min="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                💡 الكمية المتاحة سيتم حسابها تلقائياً بناءً على الحجوزات النشطة
+              </p>
             </div>
 
             <Separator />

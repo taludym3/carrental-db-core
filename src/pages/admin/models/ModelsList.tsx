@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ModelCard } from './components/ModelCard';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Car } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -36,6 +40,7 @@ import {
 const ModelsList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   const [brandFilter, setBrandFilter] = useState<string>('all');
   const [deleteModelId, setDeleteModelId] = useState<string | null>(null);
@@ -160,100 +165,130 @@ const ModelsList = () => {
         </Select>
       </div>
 
-      {/* Table */}
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>الصورة</TableHead>
-              <TableHead>الاسم (عربي)</TableHead>
-              <TableHead>الاسم (إنجليزي)</TableHead>
-              <TableHead>العلامة التجارية</TableHead>
-              <TableHead>السنة</TableHead>
-              <TableHead>الحالة</TableHead>
-              <TableHead className="text-left">الإجراءات</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+      {/* Content */}
+      {isMobile ? (
+        <div className="space-y-4">
+          {isLoading ? (
+            Array(5).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-40 w-full" />
+            ))
+          ) : models && models.length > 0 ? (
+            models.map((model) => (
+              <ModelCard
+                key={model.id}
+                model={model}
+                onView={() => navigate(`/admin/models/${model.id}`)}
+                onEdit={() => navigate(`/admin/models/${model.id}/edit`)}
+                onDelete={() => setDeleteModelId(model.id)}
+              />
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <Car className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium mb-2">لا توجد موديلات</h3>
+              <p className="text-muted-foreground">لم يتم إضافة أي موديلات حتى الآن</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
-                  جاري التحميل...
-                </TableCell>
+                <TableHead>الصورة</TableHead>
+                <TableHead>الاسم (عربي)</TableHead>
+                <TableHead>الاسم (إنجليزي)</TableHead>
+                <TableHead>العلامة التجارية</TableHead>
+                <TableHead>السنة</TableHead>
+                <TableHead>الحالة</TableHead>
+                <TableHead className="text-left">الإجراءات</TableHead>
               </TableRow>
-            ) : models?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center">
-                  لا توجد موديلات
-                </TableCell>
-              </TableRow>
-            ) : (
-              models?.map((model) => (
-                <TableRow key={model.id}>
-                  <TableCell>
-                    {model.default_image_url ? (
-                      <img
-                        src={model.default_image_url}
-                        alt={model.name_en}
-                        className="h-12 w-12 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
-                        <span className="text-xs text-muted-foreground">لا صورة</span>
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>{model.name_ar || '-'}</TableCell>
-                  <TableCell>{model.name_en}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {model.car_brands?.logo_url && (
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array(7).fill(0).map((_, j) => (
+                      <TableCell key={j}>
+                        <Skeleton className="h-8 w-full" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : models && models.length > 0 ? (
+                models.map((model) => (
+                  <TableRow key={model.id}>
+                    <TableCell>
+                      {model.default_image_url ? (
                         <img
-                          src={model.car_brands.logo_url}
-                          alt={model.car_brands.name_en}
-                          className="h-6 w-6 object-contain"
+                          src={model.default_image_url}
+                          alt={model.name_en}
+                          className="h-12 w-12 rounded object-cover"
                         />
+                      ) : (
+                        <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
+                          <span className="text-xs text-muted-foreground">لا صورة</span>
+                        </div>
                       )}
-                      <span>{model.car_brands?.name_ar || model.car_brands?.name_en}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{model.year}</TableCell>
-                  <TableCell>
-                    <Badge variant={model.is_active ? 'default' : 'secondary'}>
-                      {model.is_active ? 'نشط' : 'غير نشط'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(`/admin/models/${model.id}`)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(`/admin/models/${model.id}/edit`)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteModelId(model.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
+                    </TableCell>
+                    <TableCell>{model.name_ar || '-'}</TableCell>
+                    <TableCell>{model.name_en}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {model.car_brands?.logo_url && (
+                          <img
+                            src={model.car_brands.logo_url}
+                            alt={model.car_brands.name_en}
+                            className="h-6 w-6 object-contain"
+                          />
+                        )}
+                        <span>{model.car_brands?.name_ar || model.car_brands?.name_en}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{model.year}</TableCell>
+                    <TableCell>
+                      <Badge variant={model.is_active ? 'default' : 'secondary'}>
+                        {model.is_active ? 'نشط' : 'غير نشط'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/admin/models/${model.id}`)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/admin/models/${model.id}/edit`)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteModelId(model.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    لا توجد موديلات
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteModelId} onOpenChange={() => setDeleteModelId(null)}>
