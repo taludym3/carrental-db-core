@@ -111,7 +111,7 @@ export default function CarsList() {
   const fetchCars = async () => {
     try {
       const { data, error } = await supabase
-        .from("cars_with_details")
+        .from("cars_with_details_admin")
         .select("*")
         .order("created_at", { ascending: false });
 
