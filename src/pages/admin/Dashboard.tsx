@@ -33,6 +33,10 @@ import AnnouncementsList from './announcements/AnnouncementsList';
 import AnnouncementsAdd from './announcements/AnnouncementsAdd';
 import AnnouncementDetails from './announcements/AnnouncementDetails';
 import AnnouncementEdit from './announcements/AnnouncementEdit';
+import BranchesList from './branches/BranchesList';
+import BranchesAdd from './branches/BranchesAdd';
+import BranchDetails from './branches/BranchDetails';
+import BranchEdit from './branches/BranchEdit';
 
 const AdminDashboard = () => {
   return (
@@ -73,6 +77,11 @@ const AdminDashboard = () => {
           <Route path="announcements/add" element={<AnnouncementsAdd />} />
           <Route path="announcements/:id" element={<AnnouncementDetails />} />
           <Route path="announcements/:id/edit" element={<AnnouncementEdit />} />
+          
+          <Route path="branches" element={<BranchesList />} />
+          <Route path="branches/add" element={<BranchesAdd />} />
+          <Route path="branches/:id" element={<BranchDetails />} />
+          <Route path="branches/:id/edit" element={<BranchEdit />} />
       </Route>
     </Routes>
   );
