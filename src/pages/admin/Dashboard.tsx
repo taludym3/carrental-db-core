@@ -27,6 +27,7 @@ import FeatureDetails from './features/FeatureDetails';
 import FeatureEdit from './features/FeatureEdit';
 import BookingsList from './bookings/BookingsList';
 import BookingDetails from './bookings/BookingDetails';
+import NotificationsList from './notifications/NotificationsList';
 import DocumentsList from './documents/DocumentsList';
 import DocumentDetails from './documents/DocumentDetails';
 import AnnouncementsList from './announcements/AnnouncementsList';
@@ -69,6 +70,9 @@ const AdminDashboard = () => {
         <Route path="cars/:id/edit" element={<CarEdit />} />
           <Route path="bookings" element={<BookingsList />} />
           <Route path="bookings/:id" element={<BookingDetails />} />
+          
+          {/* Notifications */}
+          <Route path="notifications" element={<NotificationsList />} />
           
           <Route path="documents" element={<DocumentsList />} />
           <Route path="documents/:id" element={<DocumentDetails />} />

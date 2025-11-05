@@ -36,8 +36,44 @@ const Login = () => {
           ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
           : error.message
       });
-    } else {
-      toast.success('تم تسجيل الدخول بنجاح');
+      return;
+    }
+
+    toast.success('تم تسجيل الدخول بنجاح');
+
+    // انتظر تحميل الدور وتوجيه المستخدم
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+      const role = roleData?.role;
+
+      switch (role) {
+        case 'admin':
+          navigate('/admin', { replace: true });
+          break;
+        case 'branch':
+        case 'branch_employee':
+          navigate('/admin', { replace: true }); // مؤقتاً حتى يتم بناء لوحة الفرع
+          break;
+        case 'customer':
+          navigate('/', { replace: true }); // مؤقتاً حتى يتم بناء لوحة العميل
+          break;
+        default:
+          navigate(from, { replace: true });
+      }
+    } catch (err) {
       navigate(from, { replace: true });
     }
   };

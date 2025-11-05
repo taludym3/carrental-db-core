@@ -9,8 +9,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bell, Menu, LogOut, User } from 'lucide-react';
+import { Menu, LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { NotificationsDropdown } from './NotificationsDropdown';
 
 interface AdminHeaderProps {
   onMenuClick: () => void;
@@ -42,10 +43,7 @@ export const AdminHeader = ({ onMenuClick }: AdminHeaderProps) => {
 
       <div className="flex-1" />
 
-      <Button variant="ghost" size="icon" className="relative">
-        <Bell className="h-5 w-5" />
-        <span className="absolute top-1 left-1 h-2 w-2 rounded-full bg-primary" />
-      </Button>
+      <NotificationsDropdown />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

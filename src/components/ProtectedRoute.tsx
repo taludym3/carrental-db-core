@@ -30,7 +30,18 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />;
+    // توجيه للصفحة المناسبة حسب الدور
+    switch(role) {
+      case 'admin':
+        return <Navigate to="/admin" replace />;
+      case 'branch':
+      case 'branch_employee':
+        return <Navigate to="/admin" replace />; // مؤقتاً
+      case 'customer':
+        return <Navigate to="/" replace />; // مؤقتاً
+      default:
+        return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   return <>{children}</>;

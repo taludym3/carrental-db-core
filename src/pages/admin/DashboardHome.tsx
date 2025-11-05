@@ -1,29 +1,107 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Car, Calendar, DollarSign, TrendingUp } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, Car, Calendar, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 
 const DashboardHome = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const [usersRes, carsRes, bookingsRes] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact' }),
-        supabase.from('cars').select('id', { count: 'exact' }),
-        supabase.from('bookings').select('id, final_amount', { count: 'exact' }),
+      const [usersResult, carsResult, bookingsResult, revenueResult] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('cars').select('*', { count: 'exact', head: true }),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }),
+        supabase
+          .from('bookings')
+          .select('final_amount')
+          .in('status', ['completed', 'active']),
       ]);
 
-      const totalRevenue = bookingsRes.data?.reduce((sum, b) => sum + (Number(b.final_amount) || 0), 0) || 0;
+      const revenue = revenueResult.data?.reduce((sum, booking) => sum + (Number(booking.final_amount) || 0), 0) || 0;
 
       return {
-        totalUsers: usersRes.count || 0,
-        totalCars: carsRes.count || 0,
-        totalBookings: bookingsRes.count || 0,
-        totalRevenue,
+        users: usersResult.count || 0,
+        cars: carsResult.count || 0,
+        bookings: bookingsResult.count || 0,
+        revenue,
       };
     },
   });
+
+  // رسم بياني للإيرادات
+  const { data: revenueData, isLoading: isLoadingRevenue } = useQuery({
+    queryKey: ['revenue-chart'],
+    queryFn: async () => {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      const { data } = await supabase
+        .from('bookings')
+        .select('final_amount, created_at')
+        .gte('created_at', sixMonthsAgo.toISOString())
+        .in('status', ['completed', 'active']);
+
+      // تجميع حسب الشهر
+      const monthlyRevenue: Record<string, number> = {};
+      
+      data?.forEach((booking) => {
+        const date = new Date(booking.created_at);
+        const month = date.toLocaleDateString('ar-SA', { month: 'short', year: 'numeric' });
+        monthlyRevenue[month] = (monthlyRevenue[month] || 0) + (Number(booking.final_amount) || 0);
+      });
+
+      return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+        month,
+        revenue,
+      }));
+    },
+  });
+
+  // آخر الحجوزات
+  const { data: recentBookings, isLoading: isLoadingBookings } = useQuery({
+    queryKey: ['recent-bookings'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('bookings')
+        .select(`
+          id,
+          start_date,
+          end_date,
+          status,
+          final_amount,
+          customer:profiles!customer_id(full_name),
+          car:cars(
+            model:car_models(
+              name_ar,
+              brand:car_brands(name_ar)
+            )
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+  });
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' }> = {
+      pending: { label: 'قيد الانتظار', variant: 'secondary' },
+      confirmed: { label: 'مؤكد', variant: 'default' },
+      payment_pending: { label: 'بانتظار الدفع', variant: 'secondary' },
+      active: { label: 'نشط', variant: 'default' },
+      completed: { label: 'مكتمل', variant: 'default' },
+      cancelled: { label: 'ملغي', variant: 'destructive' },
+      rejected: { label: 'مرفوض', variant: 'destructive' },
+    };
+
+    const config = statusConfig[status] || { label: status, variant: 'secondary' as const };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
 
   if (isLoading) {
     return (
@@ -38,37 +116,6 @@ const DashboardHome = () => {
     );
   }
 
-  const statCards = [
-    {
-      title: 'إجمالي المستخدمين',
-      value: stats?.totalUsers || 0,
-      icon: Users,
-      trend: '+12%',
-      trendUp: true,
-    },
-    {
-      title: 'إجمالي السيارات',
-      value: stats?.totalCars || 0,
-      icon: Car,
-      trend: '+5%',
-      trendUp: true,
-    },
-    {
-      title: 'إجمالي الحجوزات',
-      value: stats?.totalBookings || 0,
-      icon: Calendar,
-      trend: '+23%',
-      trendUp: true,
-    },
-    {
-      title: 'إجمالي الإيرادات',
-      value: `${stats?.totalRevenue.toLocaleString('ar-SA')} ر.س`,
-      icon: DollarSign,
-      trend: '+18%',
-      trendUp: true,
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <div>
@@ -76,54 +123,147 @@ const DashboardHome = () => {
         <p className="text-muted-foreground mt-1">مرحباً بك في نظام إدارة LEAGO</p>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => {
-          const Icon = stat.icon;
-          const TrendIcon = stat.trendUp ? TrendingUp : TrendingDown;
-          
-          return (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <Icon className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className={`text-xs flex items-center gap-1 mt-1 ${stat.trendUp ? 'text-success' : 'text-destructive'}`}>
-                  <TrendIcon className="h-3 w-3" />
-                  <span>{stat.trend} من الشهر الماضي</span>
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>نظرة عامة على الإيرادات</CardTitle>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي المستخدمين</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center text-muted-foreground">
-              سيتم إضافة الرسوم البيانية قريباً
-            </div>
+            <div className="text-2xl font-bold">{stats?.users || 0}</div>
           </CardContent>
         </Card>
 
-        <Card className="col-span-3">
-          <CardHeader>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي السيارات</CardTitle>
+            <Car className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.cars || 0}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.bookings || 0}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.revenue?.toLocaleString('ar-SA') || 0} ر.س
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Revenue Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            نظرة عامة على الإيرادات
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingRevenue ? (
+            <Skeleton className="h-[300px] w-full" />
+          ) : revenueData && revenueData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip
+                  formatter={(value: number) => `${value.toLocaleString('ar-SA')} ر.س`}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="hsl(var(--primary))"
+                  fill="hsl(var(--primary))"
+                  fillOpacity={0.2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              لا توجد بيانات إيرادات حالياً
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Recent Bookings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <CardTitle>آخر الحجوزات</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center text-muted-foreground">
-              سيتم إضافة الجدول قريباً
+            <Link to="/admin/bookings">
+              <span className="text-sm text-primary hover:underline">عرض الكل</span>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoadingBookings ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          ) : recentBookings && recentBookings.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>العميل</TableHead>
+                  <TableHead>السيارة</TableHead>
+                  <TableHead>التاريخ</TableHead>
+                  <TableHead>المبلغ</TableHead>
+                  <TableHead>الحالة</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentBookings.map((booking: any) => (
+                  <TableRow key={booking.id}>
+                    <TableCell>{booking.customer?.full_name || 'غير محدد'}</TableCell>
+                    <TableCell>
+                      {booking.car?.model?.brand?.name_ar} {booking.car?.model?.name_ar}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(booking.start_date).toLocaleDateString('ar-SA')}
+                    </TableCell>
+                    <TableCell>
+                      {Number(booking.final_amount).toLocaleString('ar-SA')} ر.س
+                    </TableCell>
+                    <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="py-12 text-center text-muted-foreground">
+              لا توجد حجوزات حالياً
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
