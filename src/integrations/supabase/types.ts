@@ -232,6 +232,13 @@ export type Database = {
             referencedRelation: "cars_with_details"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bookings_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_with_details_admin"
+            referencedColumns: ["id"]
+          },
         ]
       }
       branches: {
@@ -390,6 +397,13 @@ export type Database = {
             columns: ["car_id"]
             isOneToOne: false
             referencedRelation: "cars_with_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_feature_assignments_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_with_details_admin"
             referencedColumns: ["id"]
           },
           {
@@ -569,6 +583,13 @@ export type Database = {
             columns: ["car_id"]
             isOneToOne: false
             referencedRelation: "cars_with_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_offers_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars_with_details_admin"
             referencedColumns: ["id"]
           },
         ]
@@ -1072,10 +1093,62 @@ export type Database = {
           branch_name_en: string | null
           brand_name_ar: string | null
           brand_name_en: string | null
+          color_hex_code: string | null
           color_name_ar: string | null
           color_name_en: string | null
           created_at: string | null
           daily_price: number | null
+          default_image_url: string | null
+          description_ar: string | null
+          description_en: string | null
+          discount_percentage: number | null
+          feature_ids: string[] | null
+          features_ar: string[] | null
+          features_en: string[] | null
+          fuel_type: string | null
+          has_active_offer: boolean | null
+          id: string | null
+          is_new: boolean | null
+          mileage: number | null
+          model_name_ar: string | null
+          model_name_en: string | null
+          monthly_price: number | null
+          offer_expires_at: string | null
+          ownership_price: number | null
+          quantity: number | null
+          rental_types: Database["public"]["Enums"]["rental_type"][] | null
+          seats: number | null
+          status: Database["public"]["Enums"]["car_status"] | null
+          transmission: string | null
+          updated_at: string | null
+          weekly_price: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cars_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cars_with_details_admin: {
+        Row: {
+          actual_available_quantity: number | null
+          additional_images: string[] | null
+          available_quantity: number | null
+          branch_id: string | null
+          branch_name_ar: string | null
+          branch_name_en: string | null
+          brand_name_ar: string | null
+          brand_name_en: string | null
+          color_hex_code: string | null
+          color_name_ar: string | null
+          color_name_en: string | null
+          created_at: string | null
+          daily_price: number | null
+          default_image_url: string | null
           description_ar: string | null
           description_en: string | null
           discount_percentage: number | null
@@ -1853,6 +1926,32 @@ export type Database = {
         }[]
       }
       get_car_for_booking: { Args: { p_car_id: string }; Returns: Json }
+      get_current_user_profile: {
+        Args: never
+        Returns: {
+          age: number
+          branch_id: string
+          branch_name_ar: string
+          branch_name_en: string
+          created_at: string
+          email: string
+          full_name: string
+          gender: string
+          id: string
+          is_customer: boolean
+          is_verified: boolean
+          location: string
+          location_accuracy: number
+          location_updated_at: string
+          phone: string
+          phone_verified_at: string
+          updated_at: string
+          user_id: string
+          user_latitude: number
+          user_longitude: number
+          user_role: string
+        }[]
+      }
       get_current_user_role: { Args: never; Returns: string }
       get_customer_documents: {
         Args: { p_customer_id: string }
@@ -3119,6 +3218,9 @@ export type Database = {
         | "booking_completed"
         | "document_approved"
         | "document_rejected"
+        | "document_pending"
+        | "booking_approved"
+        | "booking_active"
       rental_type: "daily" | "weekly" | "monthly" | "ownership"
       user_role: "admin" | "branch" | "branch_employee" | "customer"
     }
@@ -3278,6 +3380,9 @@ export const Constants = {
         "booking_completed",
         "document_approved",
         "document_rejected",
+        "document_pending",
+        "booking_approved",
+        "booking_active",
       ],
       rental_type: ["daily", "weekly", "monthly", "ownership"],
       user_role: ["admin", "branch", "branch_employee", "customer"],

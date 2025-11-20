@@ -82,10 +82,16 @@ export const NotificationsDropdown = () => {
     switch (type) {
       case 'booking_update':
         return '📅';
+      case 'booking_approved':
+        return '✅';
+      case 'booking_active':
+        return '🚗';
       case 'document_approved':
         return '✅';
       case 'document_rejected':
         return '❌';
+      case 'document_pending':
+        return '📄';
       case 'payment_received':
         return '💰';
       case 'system':
