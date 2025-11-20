@@ -28,6 +28,7 @@ import FeatureEdit from './features/FeatureEdit';
 import BookingsList from './bookings/BookingsList';
 import BookingDetails from './bookings/BookingDetails';
 import NotificationsList from './notifications/NotificationsList';
+import NotificationsSend from './notifications/NotificationsSend';
 import DocumentsList from './documents/DocumentsList';
 import DocumentDetails from './documents/DocumentDetails';
 import AnnouncementsList from './announcements/AnnouncementsList';
@@ -73,6 +74,7 @@ const AdminDashboard = () => {
           
           {/* Notifications */}
           <Route path="notifications" element={<NotificationsList />} />
+          <Route path="notifications/send" element={<NotificationsSend />} />
           
           <Route path="documents" element={<DocumentsList />} />
           <Route path="documents/:id" element={<DocumentDetails />} />
