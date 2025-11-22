@@ -1431,12 +1431,12 @@ export type Database = {
           total_amount: number
           total_days: number
           updated_at: string
-        }
+        }[]
         SetofOptions: {
           from: "*"
           to: "bookings"
-          isOneToOne: true
-          isSetofReturn: false
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       approve_document: {
