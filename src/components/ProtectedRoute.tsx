@@ -29,18 +29,32 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
-    // توجيه للصفحة المناسبة حسب الدور
-    switch(role) {
-      case 'admin':
-        return <Navigate to="/admin" replace />;
-      case 'branch':
-      case 'branch_employee':
-        return <Navigate to="/branch" replace />;
-      case 'customer':
-        return <Navigate to="/" replace />;
-      default:
-        return <Navigate to="/unauthorized" replace />;
+  if (allowedRoles) {
+    // إذا لم يتم جلب الدور بعد، اعرض شاشة تحميل
+    if (role === null) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            <p className="text-muted-foreground">جاري التحقق من الصلاحيات...</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // إذا الدور غير مسموح، وجه للصفحة المناسبة
+    if (!allowedRoles.includes(role)) {
+      switch(role) {
+        case 'admin':
+          return <Navigate to="/admin" replace />;
+        case 'branch':
+        case 'branch_employee':
+          return <Navigate to="/branch" replace />;
+        case 'customer':
+          return <Navigate to="/" replace />;
+        default:
+          return <Navigate to="/unauthorized" replace />;
+      }
     }
   }
 
