@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -18,104 +17,77 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-function MapUpdater({ center }: { center: [number, number] }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.flyTo(center, 12);
-  }, [center, map]);
-
-  return null;
-}
-
-function MapClickHandler({
-  onLocationChange,
-  readonly,
-}: {
-  onLocationChange?: (lat: number, lng: number) => void;
-  readonly: boolean;
-}) {
-  useMapEvents({
-    click(e) {
-      if (!readonly && onLocationChange) {
-        onLocationChange(e.latlng.lat, e.latlng.lng);
-      }
-    },
-  });
-
-  return null;
-}
-
-function DraggableMarker({
-  position,
-  onLocationChange,
-  readonly,
-}: {
-  position: [number, number];
-  onLocationChange?: (lat: number, lng: number) => void;
-  readonly: boolean;
-}) {
-  const handleDragEnd = (e: L.DragEndEvent) => {
-    if (!readonly && onLocationChange) {
-      const marker = e.target as L.Marker;
-      const pos = marker.getLatLng();
-      onLocationChange(pos.lat, pos.lng);
-    }
-  };
-
-  return (
-    <Marker
-      position={position}
-      draggable={!readonly}
-      eventHandlers={{
-        dragend: handleDragEnd,
-      }}
-    />
-  );
-}
-
 export function BranchLocationMap({
   latitude = 24.7136,
   longitude = 46.6753,
   onLocationChange,
   readonly = false,
 }: BranchLocationMapProps) {
-  const [position, setPosition] = useState<[number, number]>([latitude, longitude]);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
-    setPosition([latitude, longitude]);
-  }, [latitude, longitude]);
+    if (!mapRef.current) return;
 
-  const handleLocationChange = (lat: number, lng: number) => {
-    setPosition([lat, lng]);
-    onLocationChange?.(lat, lng);
-  };
+    // Initialize map only once
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapRef.current).setView([latitude, longitude], 12);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+
+      // Create marker
+      const marker = L.marker([latitude, longitude], {
+        draggable: !readonly,
+      }).addTo(map);
+
+      // Handle map click
+      if (!readonly && onLocationChange) {
+        map.on('click', (e: L.LeafletMouseEvent) => {
+          marker.setLatLng(e.latlng);
+          onLocationChange(e.latlng.lat, e.latlng.lng);
+        });
+      }
+
+      // Handle marker drag
+      if (!readonly && onLocationChange) {
+        marker.on('dragend', () => {
+          const pos = marker.getLatLng();
+          onLocationChange(pos.lat, pos.lng);
+        });
+      }
+
+      mapInstanceRef.current = map;
+      markerRef.current = marker;
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        markerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update map view and marker position when coordinates change
+  useEffect(() => {
+    if (mapInstanceRef.current && markerRef.current) {
+      const newLatLng = L.latLng(latitude, longitude);
+      mapInstanceRef.current.flyTo(newLatLng, 12);
+      markerRef.current.setLatLng(newLatLng);
+    }
+  }, [latitude, longitude]);
 
   return (
     <div className="space-y-4">
-      <div className="w-full h-96 rounded-lg border overflow-hidden">
-        <MapContainer
-          center={position}
-          zoom={12}
-          style={{ height: '100%', width: '100%' }}
-          scrollWheelZoom={true}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MapUpdater center={position} />
-          <MapClickHandler
-            onLocationChange={handleLocationChange}
-            readonly={readonly}
-          />
-          <DraggableMarker
-            position={position}
-            onLocationChange={handleLocationChange}
-            readonly={readonly}
-          />
-        </MapContainer>
-      </div>
+      <div 
+        ref={mapRef} 
+        className="w-full h-96 rounded-lg border overflow-hidden"
+      />
 
       {!readonly && (
         <p className="text-sm text-muted-foreground">
