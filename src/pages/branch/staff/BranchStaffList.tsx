@@ -180,12 +180,7 @@ export default function BranchStaffList() {
             إدارة موظفي الفرع والصلاحيات
           </p>
         </div>
-        {isBranchManager && (
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <UserPlus className="ml-2 h-4 w-4" />
-            إضافة موظف
-          </Button>
-        )}
+        {/* Add Employee button temporarily removed */}
       </div>
 
       {/* Stats */}
@@ -243,12 +238,7 @@ export default function BranchStaffList() {
             <div className="text-center py-12">
               <User className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground mb-4">لا يوجد موظفين في هذا الفرع</p>
-              {isBranchManager && (
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                  <UserPlus className="ml-2 h-4 w-4" />
-                  إضافة أول موظف
-                </Button>
-              )}
+              {/* Add Employee button temporarily removed */}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -330,12 +320,7 @@ export default function BranchStaffList() {
         </CardContent>
       </Card>
 
-      {/* Add Employee Dialog */}
-      <AddEmployeeDialog
-        open={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
-        branchId={branchId || undefined}
-      />
+      {/* Add Employee Dialog - temporarily removed */}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
