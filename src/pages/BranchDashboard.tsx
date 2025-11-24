@@ -7,6 +7,7 @@ import BranchCarsAdd from './branch/cars/BranchCarsAdd';
 import BranchCarEdit from './branch/cars/BranchCarEdit';
 import BranchBookingsList from './branch/bookings/BranchBookingsList';
 import BranchBookingDetails from './branch/bookings/BranchBookingDetails';
+import BranchStaffList from './branch/staff/BranchStaffList';
 import BranchNotificationsList from './branch/notifications/BranchNotificationsList';
 
 const BranchDashboard = () => {
@@ -20,6 +21,7 @@ const BranchDashboard = () => {
         <Route path="cars/:id/edit" element={<BranchCarEdit />} />
         <Route path="bookings" element={<BranchBookingsList />} />
         <Route path="bookings/:id" element={<BranchBookingDetails />} />
+        <Route path="staff" element={<BranchStaffList />} />
         <Route path="notifications" element={<BranchNotificationsList />} />
       </Route>
     </Routes>

@@ -1384,6 +1384,15 @@ export type Database = {
         Returns: unknown
       }
       _st_within: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      add_branch_employee: {
+        Args: {
+          p_branch_id: string
+          p_email: string
+          p_full_name: string
+          p_phone: string
+        }
+        Returns: Json
+      }
       add_feature_to_car: {
         Args: { p_car_id: string; p_feature_id: string }
         Returns: undefined
@@ -2043,6 +2052,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_branch_employees: {
+        Args: { p_branch_id?: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          is_active: boolean
+          phone: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }[]
+      }
       get_branch_employees_count: {
         Args: { _branch_id: string }
         Returns: number
@@ -2627,6 +2648,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      remove_branch_employee: {
+        Args: { p_employee_user_id: string }
+        Returns: Json
       }
       remove_feature_from_car: {
         Args: { p_car_id: string; p_feature_id: string }
@@ -3426,6 +3451,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      toggle_branch_employee_status: {
+        Args: { p_employee_user_id: string; p_is_active: boolean }
+        Returns: Json
       }
       unlockrows: { Args: { "": string }; Returns: number }
       update_booking_notes: {
