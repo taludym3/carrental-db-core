@@ -77,30 +77,36 @@ export type Database = {
         Row: {
           action: string | null
           actor: string | null
+          changed_by: string | null
           id: number
           new_data: Json | null
           occurred_at: string
           old_data: Json | null
+          record_id: string | null
           row_id: string | null
           table_name: string
         }
         Insert: {
           action?: string | null
           actor?: string | null
+          changed_by?: string | null
           id?: number
           new_data?: Json | null
           occurred_at?: string
           old_data?: Json | null
+          record_id?: string | null
           row_id?: string | null
           table_name: string
         }
         Update: {
           action?: string | null
           actor?: string | null
+          changed_by?: string | null
           id?: number
           new_data?: Json | null
           occurred_at?: string
           old_data?: Json | null
+          record_id?: string | null
           row_id?: string | null
           table_name?: string
         }
@@ -3505,7 +3511,6 @@ export type Database = {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: {
           booking_data: Json
-          error_code: string
           error_message: string
           is_valid: boolean
         }[]
