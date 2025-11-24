@@ -9,6 +9,7 @@ import { DocumentPreview } from "./DocumentPreview";
 import { ApproveDocumentDialog } from "./ApproveDocumentDialog";
 import { RejectDocumentDialog } from "./RejectDocumentDialog";
 import { DocumentStatusBadge } from "../../bookings/components/DocumentStatusBadge";
+import { ChangeDocumentStatusDialog } from "./ChangeDocumentStatusDialog";
 
 interface Document {
   id: string;
@@ -82,11 +83,17 @@ export function DocumentReviewCard({
 
         {/* Rejection Reason */}
         {document.status === "rejected" && document.rejection_reason && (
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
-            <p className="text-sm font-medium text-destructive">سبب الرفض:</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {document.rejection_reason}
-            </p>
+          <div className="space-y-3">
+            <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+              <p className="text-sm font-medium text-destructive">سبب الرفض:</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {document.rejection_reason}
+              </p>
+            </div>
+            <ChangeDocumentStatusDialog 
+              documentId={document.id} 
+              currentStatus={status}
+            />
           </div>
         )}
 
@@ -103,9 +110,15 @@ export function DocumentReviewCard({
         )}
 
         {document.status === "approved" && (
-          <div className="flex items-center justify-center gap-2 rounded-lg bg-green-50 p-3 text-sm font-medium text-green-700 dark:bg-green-950/20 dark:text-green-400">
-            <CheckCircle2 className="h-4 w-4" />
-            تمت الموافقة على هذا المستند
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-2 rounded-lg bg-green-50 p-3 text-sm font-medium text-green-700 dark:bg-green-950/20 dark:text-green-400">
+              <CheckCircle2 className="h-4 w-4" />
+              تمت الموافقة على هذا المستند
+            </div>
+            <ChangeDocumentStatusDialog 
+              documentId={document.id} 
+              currentStatus={status}
+            />
           </div>
         )}
       </CardContent>
