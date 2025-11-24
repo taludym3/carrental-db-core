@@ -42,6 +42,7 @@ import BranchEdit from './branches/BranchEdit';
 import PaymentsList from './payments/PaymentsList';
 import PaymentDetails from './payments/PaymentDetails';
 import ReportsDashboard from './reports/ReportsDashboard';
+import CustomerDocumentsReview from './documents/CustomerDocumentsReview';
 
 const AdminDashboard = () => {
   return (
@@ -81,6 +82,7 @@ const AdminDashboard = () => {
           
           <Route path="documents" element={<DocumentsList />} />
           <Route path="documents/:id" element={<DocumentDetails />} />
+          <Route path="customers/:customerId/documents" element={<CustomerDocumentsReview />} />
           
           <Route path="announcements" element={<AnnouncementsList />} />
           <Route path="announcements/add" element={<AnnouncementsAdd />} />
