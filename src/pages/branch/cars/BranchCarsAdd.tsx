@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const formSchema = z.object({
 export default function BranchCarsAdd() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [branchId, setBranchId] = useState<string>("");
   const [models, setModels] = useState<any[]>([]);
@@ -145,6 +147,7 @@ export default function BranchCarsAdd() {
       }
 
       toast.success("تم إضافة السيارة بنجاح");
+      await queryClient.invalidateQueries({ queryKey: ['branch-cars'] });
       navigate("/branch/cars");
     } catch (error: any) {
       toast.error(error.message || "خطأ في الإضافة");

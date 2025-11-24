@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ const formSchema = z.object({
 export default function BranchCarEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [models, setModels] = useState<any[]>([]);
@@ -137,6 +139,7 @@ export default function BranchCarEdit() {
       if (featuresError) throw featuresError;
 
       toast.success("تم تحديث بيانات السيارة بنجاح");
+      await queryClient.invalidateQueries({ queryKey: ['branch-cars'] });
       navigate(`/branch/cars/${id}`);
     } catch (error: any) {
       toast.error(error.message || "خطأ في التحديث");
