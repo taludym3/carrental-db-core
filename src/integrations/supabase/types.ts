@@ -3452,7 +3452,7 @@ export type Database = {
         Args: {
           p_document_id: string
           p_new_status: Database["public"]["Enums"]["document_status"]
-          p_reason?: string
+          p_rejection_reason?: string
         }
         Returns: {
           created_at: string
