@@ -10,6 +10,7 @@ import BranchBookingDetails from './branch/bookings/BranchBookingDetails';
 import BranchStaffList from './branch/staff/BranchStaffList';
 import BranchNotificationsList from './branch/notifications/BranchNotificationsList';
 import BranchReportsDashboard from './branch/reports/BranchReportsDashboard';
+import BranchSettings from './branch/settings/BranchSettings';
 
 const BranchDashboard = () => {
   return (
@@ -25,6 +26,7 @@ const BranchDashboard = () => {
         <Route path="staff" element={<BranchStaffList />} />
         <Route path="notifications" element={<BranchNotificationsList />} />
         <Route path="reports" element={<BranchReportsDashboard />} />
+        <Route path="settings" element={<BranchSettings />} />
       </Route>
     </Routes>
   );
