@@ -1630,13 +1630,15 @@ export type Database = {
       complete_active_bookings: { Args: never; Returns: number }
       complete_booking_payment_transaction: {
         Args: {
-          p_booking_data: Json
+          p_booking_data?: Json
           p_booking_id: string
           p_payment_reference: string
           p_user_id: string
         }
         Returns: {
+          booking_id: string
           message: string
+          payment_id: string
           success: boolean
         }[]
       }
@@ -1945,7 +1947,17 @@ export type Database = {
       }
       get_booking_for_payment_check: {
         Args: { p_booking_id: string; p_user_id: string }
-        Returns: Json
+        Returns: {
+          booking_data: Json
+          booking_id: string
+          car_id: string
+          created_at: string
+          current_status: Database["public"]["Enums"]["booking_status"]
+          customer_id: string
+          end_date: string
+          final_amount: number
+          start_date: string
+        }[]
       }
       get_booking_full_details: {
         Args: { p_booking_id: string }
@@ -2442,8 +2454,8 @@ export type Database = {
           p_user_id: string
         }
         Returns: {
+          booking_status: Database["public"]["Enums"]["booking_status"]
           message: string
-          new_expires_at: string
           success: boolean
         }[]
       }
@@ -3431,8 +3443,8 @@ export type Database = {
       update_booking_to_payment_pending: {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: {
+          booking_status: Database["public"]["Enums"]["booking_status"]
           message: string
-          new_expires_at: string
           success: boolean
         }[]
       }
