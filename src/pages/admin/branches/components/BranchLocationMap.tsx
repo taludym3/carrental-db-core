@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { MapboxTokenInput } from '@/components/admin/MapboxTokenInput';
+import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 interface BranchLocationMapProps {
   latitude?: number;
@@ -21,6 +23,39 @@ export function BranchLocationMap({
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const [mapboxToken, setMapboxToken] = useState('');
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [isLoadingToken, setIsLoadingToken] = useState(true);
+  const [tokenError, setTokenError] = useState<string | null>(null);
+
+  // Fetch Mapbox token on mount
+  useEffect(() => {
+    const fetchMapboxToken = async () => {
+      try {
+        setIsLoadingToken(true);
+        setTokenError(null);
+
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+
+        if (error) {
+          console.error('Error fetching Mapbox token:', error);
+          setTokenError('فشل تحميل رمز الخريطة. يرجى المحاولة لاحقاً.');
+          return;
+        }
+
+        if (data?.token) {
+          setMapboxToken(data.token);
+        } else {
+          setTokenError('لم يتم إعداد رمز Mapbox. يرجى إضافة MAPBOX_PUBLIC_TOKEN في إعدادات Supabase.');
+        }
+      } catch (err) {
+        console.error('Error fetching Mapbox token:', err);
+        setTokenError('حدث خطأ أثناء تحميل الخريطة.');
+      } finally {
+        setIsLoadingToken(false);
+      }
+    };
+
+    fetchMapboxToken();
+  }, []);
 
   // Initialize map when token is provided
   useEffect(() => {
@@ -97,21 +132,31 @@ export function BranchLocationMap({
 
   return (
     <div className="space-y-4">
-      <MapboxTokenInput token={mapboxToken} onTokenChange={setMapboxToken} />
+      {isLoadingToken && (
+        <Alert>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <AlertDescription>جاري تحميل الخريطة...</AlertDescription>
+        </Alert>
+      )}
+
+      {tokenError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{tokenError}</AlertDescription>
+        </Alert>
+      )}
 
       <div
         ref={mapRef}
         className="w-full h-96 rounded-lg border"
         style={{ minHeight: '384px' }}
       >
-        {!mapboxToken && (
+        {!mapboxToken && !isLoadingToken && (
           <div className="w-full h-full flex items-center justify-center bg-muted">
             <div className="text-center p-6">
               <p className="text-muted-foreground mb-2">خريطة Mapbox</p>
               <p className="text-sm text-muted-foreground">
-                {readonly 
-                  ? 'أدخل رمز Mapbox أعلاه لعرض الموقع' 
-                  : 'أدخل رمز Mapbox أعلاه لبدء تحديد الموقع'}
+                {tokenError || 'في انتظار تحميل رمز الخريطة...'}
               </p>
               {latitude && longitude && (
                 <p className="text-xs text-muted-foreground mt-2">
