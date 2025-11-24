@@ -1542,6 +1542,19 @@ export type Database = {
         Args: { _st: Database["public"]["Enums"]["booking_status"] }
         Returns: boolean
       }
+      bulk_update_documents_status: {
+        Args: {
+          p_document_ids: string[]
+          p_rejection_reason?: string
+          p_status: Database["public"]["Enums"]["document_status"]
+        }
+        Returns: {
+          document_id: string
+          document_type: string
+          new_status: Database["public"]["Enums"]["document_status"]
+          user_id: string
+        }[]
+      }
       calculate_booking_price: {
         Args: {
           p_car_id: string
