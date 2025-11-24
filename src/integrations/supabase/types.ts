@@ -1966,6 +1966,34 @@ export type Database = {
           transaction_reference: string
         }[]
       }
+      get_bookings_report: {
+        Args: {
+          p_branch_id?: string
+          p_end_date: string
+          p_start_date: string
+          p_status?: string
+        }
+        Returns: {
+          active_bookings: number
+          average_booking_value: number
+          average_rental_days: number
+          branch_breakdown: Json
+          cancelled_bookings: number
+          completed_bookings: number
+          conversion_rate: number
+          daily_breakdown: Json
+          daily_rentals: number
+          monthly_rentals: number
+          ownership_rentals: number
+          pending_bookings: number
+          rejected_bookings: number
+          status_breakdown: Json
+          total_bookings: number
+          total_discount: number
+          total_revenue: number
+          weekly_rentals: number
+        }[]
+      }
       get_branch_active_bookings_count: {
         Args: { _branch_id: string }
         Returns: number
@@ -2004,6 +2032,26 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_branches_performance_report: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          active_bookings: number
+          available_cars: number
+          bookings_change: number
+          branch_id: string
+          branch_name_ar: string
+          branch_name_en: string
+          completed_bookings: number
+          pending_payments: number
+          performance_score: number
+          revenue_change: number
+          total_bookings: number
+          total_cars: number
+          total_payments: number
+          total_revenue: number
+          utilization_rate: number
+        }[]
+      }
       get_car_features: {
         Args: { p_car_id: string }
         Returns: {
@@ -2013,6 +2061,39 @@ export type Database = {
         }[]
       }
       get_car_for_booking: { Args: { p_car_id: string }; Returns: Json }
+      get_cars_performance_report: {
+        Args: { p_branch_id?: string; p_end_date: string; p_start_date: string }
+        Returns: {
+          availability_status: string
+          average_daily_rate: number
+          branch_name_ar: string
+          brand_name_ar: string
+          car_id: string
+          current_status: Database["public"]["Enums"]["car_status"]
+          model_name_ar: string
+          popularity_score: number
+          total_bookings: number
+          total_rental_days: number
+          total_revenue: number
+          utilization_rate: number
+        }[]
+      }
+      get_comparison_report: {
+        Args: {
+          p_current_end: string
+          p_current_start: string
+          p_previous_end: string
+          p_previous_start: string
+        }
+        Returns: {
+          change_amount: number
+          change_percentage: number
+          current_value: number
+          metric_name: string
+          previous_value: number
+          trend: string
+        }[]
+      }
       get_current_user_profile: {
         Args: never
         Returns: {
@@ -2053,6 +2134,24 @@ export type Database = {
           verified_by_name: string
         }[]
       }
+      get_customers_report: {
+        Args: { p_end_date?: string; p_start_date?: string }
+        Returns: {
+          active_customers: number
+          age_distribution: Json
+          average_customer_value: number
+          customers_with_bookings: number
+          gender_distribution: Json
+          growth_timeline: Json
+          high_value_customers: number
+          location_distribution: Json
+          new_customers: number
+          repeat_customers: number
+          total_customers: number
+          verification_rate: number
+          verified_customers: number
+        }[]
+      }
       get_documents_by_status: {
         Args: {
           p_limit?: number
@@ -2073,6 +2172,20 @@ export type Database = {
           user_phone: string
           verified_at: string
           verified_by_name: string
+        }[]
+      }
+      get_documents_report: {
+        Args: { p_end_date?: string; p_start_date?: string }
+        Returns: {
+          approval_rate: number
+          approved_documents: number
+          average_verification_time: unknown
+          daily_submissions: Json
+          document_types_breakdown: Json
+          pending_documents: number
+          rejected_documents: number
+          total_documents: number
+          verification_stats: Json
         }[]
       }
       get_nearest_cars: {
@@ -2204,6 +2317,26 @@ export type Database = {
           user_id: string
           user_name: string
           user_phone: string
+        }[]
+      }
+      get_revenue_report: {
+        Args: {
+          p_branch_id?: string
+          p_end_date: string
+          p_group_by?: string
+          p_start_date: string
+        }
+        Returns: {
+          average_payment_amount: number
+          payment_methods_breakdown: Json
+          payment_success_rate: number
+          revenue_growth: number
+          time_series: Json
+          top_branches: Json
+          total_paid: number
+          total_pending: number
+          total_refunded: number
+          total_revenue: number
         }[]
       }
       get_search_statistics: {
