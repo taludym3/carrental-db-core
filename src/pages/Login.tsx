@@ -65,11 +65,13 @@ const Login = () => {
           break;
         case 'branch':
         case 'branch_employee':
-          navigate('/admin', { replace: true }); // مؤقتاً حتى يتم بناء لوحة الفرع
+          navigate('/branch', { replace: true });
           break;
         case 'customer':
-          navigate('/', { replace: true }); // مؤقتاً حتى يتم بناء لوحة العميل
-          break;
+          toast.error('تسجيل الدخول غير متاح للعملاء حالياً');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
         default:
           navigate(from, { replace: true });
       }

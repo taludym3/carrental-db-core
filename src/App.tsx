@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
+import BranchDashboard from "./pages/BranchDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,15 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/branch/*"
+              element={
+                <ProtectedRoute allowedRoles={['branch', 'branch_employee']}>
+                  <BranchDashboard />
                 </ProtectedRoute>
               }
             />

@@ -195,7 +195,7 @@ const BranchBookingsList = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate(`/admin/bookings/${booking.id}`)}
+                        onClick={() => navigate(`/branch/bookings/${booking.id}`)}
                       >
                         <Eye className="h-4 w-4 ml-2" />
                         عرض

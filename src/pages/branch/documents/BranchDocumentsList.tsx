@@ -192,7 +192,7 @@ const BranchDocumentsList = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate(`/admin/documents/${doc.id}`)}
+                        onClick={() => navigate(`/branch/documents/${doc.id}`)}
                       >
                         <Eye className="h-4 w-4 ml-2" />
                         عرض
