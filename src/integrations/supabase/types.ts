@@ -2486,6 +2486,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_branch_employee: { Args: never; Returns: boolean }
       is_branch_manager: { Args: never; Returns: boolean }
       log_availability_inconsistency: {
         Args: { p_car_id: string; p_details: Json; p_issue_type: string }
