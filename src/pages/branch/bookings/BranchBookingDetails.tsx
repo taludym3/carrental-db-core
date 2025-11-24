@@ -5,10 +5,11 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, User, Car, Building2, Calendar } from 'lucide-react';
+import { ArrowLeft, User, Car, Building2, Calendar, FileText } from 'lucide-react';
 import { BookingStatusBadge } from '@/pages/admin/bookings/components/BookingStatusBadge';
 import { ApproveBookingDialog } from '@/pages/admin/bookings/components/ApproveBookingDialog';
 import { RejectBookingDialog } from '@/pages/admin/bookings/components/RejectBookingDialog';
+import { CustomerDocumentsDialog } from '@/pages/admin/bookings/components/CustomerDocumentsDialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -172,6 +173,40 @@ const BranchBookingDetails = () => {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* مستندات العميل */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              مستندات العميل
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <p className="text-2xl font-bold text-green-600">
+                  {booking.customer_approved_documents_count}
+                </p>
+                <p className="text-xs text-muted-foreground">مقبولة</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {booking.customer_documents_count - booking.customer_approved_documents_count}
+                </p>
+                <p className="text-xs text-muted-foreground">قيد المراجعة</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-muted-foreground">
+                  {booking.customer_documents_count}
+                </p>
+                <p className="text-xs text-muted-foreground">الإجمالي</p>
+              </div>
+            </div>
+            <Separator />
+            <CustomerDocumentsDialog customerId={booking.customer_id} />
           </CardContent>
         </Card>
 
