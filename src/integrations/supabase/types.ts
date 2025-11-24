@@ -1384,15 +1384,25 @@ export type Database = {
         Returns: unknown
       }
       _st_within: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
-      add_branch_employee: {
-        Args: {
-          p_branch_id: string
-          p_email: string
-          p_full_name: string
-          p_phone: string
-        }
-        Returns: Json
-      }
+      add_branch_employee:
+        | {
+            Args: {
+              p_branch_id: string
+              p_email: string
+              p_full_name: string
+              p_phone: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_branch_id: string
+              p_email: string
+              p_full_name: string
+              p_phone: string
+            }
+            Returns: Json
+          }
       add_feature_to_car: {
         Args: { p_car_id: string; p_feature_id: string }
         Returns: undefined
