@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, ExternalLink } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { DocumentStatusBadge } from './DocumentStatusBadge';
 import { DocumentPreview } from '@/pages/admin/documents/components/DocumentPreview';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -111,28 +111,6 @@ export const CustomerDocumentsDialog = ({ customerId }: CustomerDocumentsDialogP
                             <strong>سبب الرفض:</strong> {doc.rejection_reason}
                           </div>
                         )}
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            try {
-                              const { data, error } = await supabase.storage
-                                .from('documents')
-                                .createSignedUrl(doc.document_url, 3600);
-                              
-                              if (error) throw error;
-                              if (data) window.open(data.signedUrl, '_blank');
-                            } catch (err) {
-                              console.error('Error opening document:', err);
-                            }
-                          }}
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          فتح في تبويب جديد
-                        </Button>
                       </div>
                     ))}
                   </div>
