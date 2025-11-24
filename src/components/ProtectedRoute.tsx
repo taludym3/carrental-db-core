@@ -36,9 +36,9 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
         return <Navigate to="/admin" replace />;
       case 'branch':
       case 'branch_employee':
-        return <Navigate to="/admin" replace />; // مؤقتاً
+        return <Navigate to="/branch" replace />;
       case 'customer':
-        return <Navigate to="/" replace />; // مؤقتاً
+        return <Navigate to="/" replace />;
       default:
         return <Navigate to="/unauthorized" replace />;
     }
