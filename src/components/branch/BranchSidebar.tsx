@@ -5,7 +5,8 @@ import {
   Calendar, 
   Bell,
   Users,
-  ChevronRight
+  ChevronRight,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +15,7 @@ const menuItems = [
   { title: 'السيارات', icon: Car, path: '/branch/cars' },
   { title: 'الحجوزات', icon: Calendar, path: '/branch/bookings' },
   { title: 'الموظفين', icon: Users, path: '/branch/staff' },
+  { title: 'التقارير', icon: BarChart3, path: '/branch/reports' },
   { title: 'الإشعارات', icon: Bell, path: '/branch/notifications' },
 ];
 
