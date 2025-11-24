@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MultiImageUploader } from '@/components/admin/MultiImageUploader';
+import { BranchLocationMap } from '@/pages/admin/branches/components/BranchLocationMap';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Save } from 'lucide-react';
 
@@ -41,12 +42,15 @@ export default function BranchSettings() {
   const [images, setImages] = useState<string[]>([]);
   const [branchId, setBranchId] = useState<string | null>(null);
   const [isManager, setIsManager] = useState(false);
+  const [latitude, setLatitude] = useState<number>(24.7136);
+  const [longitude, setLongitude] = useState<number>(46.6753);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<BranchSettingsFormData>({
     resolver: zodResolver(branchSettingsSchema),
   });
@@ -99,6 +103,9 @@ export default function BranchSettings() {
       if (error) throw error;
 
       if (branchData) {
+        setLatitude(branchData.latitude || 24.7136);
+        setLongitude(branchData.longitude || 46.6753);
+        
         reset({
           name_en: branchData.name_en,
           name_ar: branchData.name_ar || '',
@@ -121,6 +128,13 @@ export default function BranchSettings() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    setValue('latitude', lat);
+    setValue('longitude', lng);
   };
 
   const onSubmit = async (data: BranchSettingsFormData) => {
@@ -306,35 +320,15 @@ export default function BranchSettings() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="latitude">خط العرض (Latitude)</Label>
-                <Input
-                  id="latitude"
-                  type="number"
-                  step="any"
-                  {...register('latitude', { valueAsNumber: true })}
-                  placeholder="24.7136"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="longitude">خط الطول (Longitude)</Label>
-                <Input
-                  id="longitude"
-                  type="number"
-                  step="any"
-                  {...register('longitude', { valueAsNumber: true })}
-                  placeholder="46.6753"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>الموقع على الخريطة</Label>
+              <BranchLocationMap
+                latitude={latitude}
+                longitude={longitude}
+                onLocationChange={handleLocationChange}
+                readonly={false}
+              />
             </div>
-
-            <Alert>
-              <AlertDescription>
-                يمكنك استخدام Google Maps للحصول على الإحداثيات الدقيقة للفرع
-              </AlertDescription>
-            </Alert>
           </CardContent>
         </Card>
 
