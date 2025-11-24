@@ -3452,26 +3452,20 @@ export type Database = {
         Args: {
           p_document_id: string
           p_new_status: Database["public"]["Enums"]["document_status"]
-          p_rejection_reason?: string
+          p_reason?: string
         }
         Returns: {
           created_at: string
           document_type: string
           document_url: string
           id: string
-          rejection_reason: string | null
-          status: Database["public"]["Enums"]["document_status"] | null
+          rejection_reason: string
+          status: Database["public"]["Enums"]["document_status"]
           updated_at: string
           user_id: string
-          verified_at: string | null
-          verified_by: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "documents"
-          isOneToOne: true
-          isSetofReturn: false
-        }
+          verified_at: string
+          verified_by: string
+        }[]
       }
       update_payment_status: {
         Args: { p_new_status: string; p_notes?: string; p_payment_id: string }
