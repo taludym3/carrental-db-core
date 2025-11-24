@@ -18,50 +18,54 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-function MapController({
-  center,
-  position,
-  onLocationChange,
-  readonly,
-}: {
-  center: [number, number];
-  position: [number, number];
-  onLocationChange?: (lat: number, lng: number) => void;
-  readonly: boolean;
-}) {
+function MapUpdater({ center }: { center: [number, number] }) {
   const map = useMap();
-  const [markerPosition, setMarkerPosition] = useState<[number, number]>(position);
-
+  
   useEffect(() => {
     map.flyTo(center, 12);
   }, [center, map]);
 
-  useEffect(() => {
-    setMarkerPosition(position);
-  }, [position]);
+  return null;
+}
 
+function MapClickHandler({
+  onLocationChange,
+  readonly,
+}: {
+  onLocationChange?: (lat: number, lng: number) => void;
+  readonly: boolean;
+}) {
   useMapEvents({
     click(e) {
       if (!readonly && onLocationChange) {
-        const newPos: [number, number] = [e.latlng.lat, e.latlng.lng];
-        setMarkerPosition(newPos);
         onLocationChange(e.latlng.lat, e.latlng.lng);
       }
     },
   });
 
+  return null;
+}
+
+function DraggableMarker({
+  position,
+  onLocationChange,
+  readonly,
+}: {
+  position: [number, number];
+  onLocationChange?: (lat: number, lng: number) => void;
+  readonly: boolean;
+}) {
   const handleDragEnd = (e: L.DragEndEvent) => {
     if (!readonly && onLocationChange) {
       const marker = e.target as L.Marker;
       const pos = marker.getLatLng();
-      setMarkerPosition([pos.lat, pos.lng]);
       onLocationChange(pos.lat, pos.lng);
     }
   };
 
   return (
     <Marker
-      position={markerPosition}
+      position={position}
       draggable={!readonly}
       eventHandlers={{
         dragend: handleDragEnd,
@@ -76,7 +80,16 @@ export function BranchLocationMap({
   onLocationChange,
   readonly = false,
 }: BranchLocationMapProps) {
-  const position: [number, number] = [latitude, longitude];
+  const [position, setPosition] = useState<[number, number]>([latitude, longitude]);
+
+  useEffect(() => {
+    setPosition([latitude, longitude]);
+  }, [latitude, longitude]);
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setPosition([lat, lng]);
+    onLocationChange?.(lat, lng);
+  };
 
   return (
     <div className="space-y-4">
@@ -91,10 +104,14 @@ export function BranchLocationMap({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MapController
-            center={position}
+          <MapUpdater center={position} />
+          <MapClickHandler
+            onLocationChange={handleLocationChange}
+            readonly={readonly}
+          />
+          <DraggableMarker
             position={position}
-            onLocationChange={onLocationChange}
+            onLocationChange={handleLocationChange}
             readonly={readonly}
           />
         </MapContainer>
