@@ -3573,6 +3573,7 @@ export type Database = {
         | "document_pending"
         | "booking_approved"
         | "booking_active"
+        | "new_booking"
       rental_type: "daily" | "weekly" | "monthly" | "ownership"
       user_role: "admin" | "branch" | "branch_employee" | "customer"
     }
@@ -3735,6 +3736,7 @@ export const Constants = {
         "document_pending",
         "booking_approved",
         "booking_active",
+        "new_booking",
       ],
       rental_type: ["daily", "weekly", "monthly", "ownership"],
       user_role: ["admin", "branch", "branch_employee", "customer"],
