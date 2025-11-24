@@ -850,6 +850,68 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          payment_date: string | null
+          payment_method: string
+          payment_status: string | null
+          refund_amount: number | null
+          refund_date: string | null
+          refund_reason: string | null
+          transaction_reference: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          payment_date?: string | null
+          payment_method: string
+          payment_status?: string | null
+          refund_amount?: number | null
+          refund_date?: string | null
+          refund_reason?: string | null
+          transaction_reference?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string
+          payment_status?: string | null
+          refund_amount?: number | null
+          refund_date?: string | null
+          refund_reason?: string | null
+          transaction_reference?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       phone_verifications: {
         Row: {
           created_at: string | null
@@ -1319,6 +1381,16 @@ export type Database = {
       add_feature_to_car: {
         Args: { p_car_id: string; p_feature_id: string }
         Returns: undefined
+      }
+      add_manual_payment: {
+        Args: {
+          p_amount: number
+          p_booking_id: string
+          p_notes?: string
+          p_payment_method: string
+          p_transaction_reference?: string
+        }
+        Returns: string
       }
       addauth: { Args: { "": string }; Returns: boolean }
       addgeometrycolumn:
@@ -1879,6 +1951,21 @@ export type Database = {
         Args: { p_booking_id: string }
         Returns: Json
       }
+      get_booking_payments: {
+        Args: { p_booking_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          created_by_name: string
+          notes: string
+          payment_date: string
+          payment_id: string
+          payment_method: string
+          payment_status: string
+          refund_amount: number
+          transaction_reference: string
+        }[]
+      }
       get_branch_active_bookings_count: {
         Args: { _branch_id: string }
         Returns: number
@@ -2007,6 +2094,101 @@ export type Database = {
           main_image_url: string
           seats: number
           transmission: string
+        }[]
+      }
+      get_payment_details: {
+        Args: { p_payment_id: string }
+        Returns: {
+          amount: number
+          booking_end_date: string
+          booking_final_amount: number
+          booking_id: string
+          booking_start_date: string
+          booking_status: Database["public"]["Enums"]["booking_status"]
+          booking_total_amount: number
+          branch_id: string
+          branch_name_ar: string
+          branch_phone: string
+          car_brand_ar: string
+          car_color_ar: string
+          car_id: string
+          car_image_url: string
+          car_model_ar: string
+          created_at: string
+          created_by_id: string
+          created_by_name: string
+          created_by_role: string
+          customer_email: string
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          customer_verified: boolean
+          metadata: Json
+          notes: string
+          payment_date: string
+          payment_id: string
+          payment_method: string
+          payment_status: string
+          refund_amount: number
+          refund_date: string
+          refund_reason: string
+          remaining_amount: number
+          total_paid: number
+          transaction_reference: string
+          updated_at: string
+        }[]
+      }
+      get_payment_stats: {
+        Args: {
+          p_branch_id?: string
+          p_end_date?: string
+          p_start_date?: string
+        }
+        Returns: {
+          avg_payment_amount: number
+          count_completed: number
+          count_failed: number
+          count_pending: number
+          count_refunded: number
+          count_today: number
+          total_completed: number
+          total_failed: number
+          total_pending: number
+          total_refunded: number
+          total_today: number
+        }[]
+      }
+      get_payments_list: {
+        Args: {
+          p_branch_id?: string
+          p_end_date?: string
+          p_limit?: number
+          p_offset?: number
+          p_payment_method?: string
+          p_start_date?: string
+          p_status?: string
+        }
+        Returns: {
+          amount: number
+          booking_id: string
+          booking_reference: string
+          branch_id: string
+          branch_name_ar: string
+          car_model_ar: string
+          created_at: string
+          created_by_name: string
+          customer_email: string
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          notes: string
+          payment_date: string
+          payment_id: string
+          payment_method: string
+          payment_status: string
+          refund_amount: number
+          total_count: number
+          transaction_reference: string
         }[]
       }
       get_pending_documents: {
@@ -2199,6 +2381,14 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      process_refund: {
+        Args: {
+          p_payment_id: string
+          p_refund_amount: number
+          p_refund_reason: string
+        }
+        Returns: string
+      }
       quick_search_suggestions:
         | {
             Args: { _lang?: string; _limit?: number; _term: string }
@@ -3137,6 +3327,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      update_payment_status: {
+        Args: { p_new_status: string; p_notes?: string; p_payment_id: string }
+        Returns: string
       }
       update_user_location: {
         Args: {

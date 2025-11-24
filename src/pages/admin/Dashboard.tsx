@@ -39,6 +39,8 @@ import BranchesList from './branches/BranchesList';
 import BranchesAdd from './branches/BranchesAdd';
 import BranchDetails from './branches/BranchDetails';
 import BranchEdit from './branches/BranchEdit';
+import PaymentsList from './payments/PaymentsList';
+import PaymentDetails from './payments/PaymentDetails';
 
 const AdminDashboard = () => {
   return (
@@ -88,6 +90,9 @@ const AdminDashboard = () => {
           <Route path="branches/add" element={<BranchesAdd />} />
           <Route path="branches/:id" element={<BranchDetails />} />
           <Route path="branches/:id/edit" element={<BranchEdit />} />
+          
+          <Route path="payments" element={<PaymentsList />} />
+          <Route path="payments/:id" element={<PaymentDetails />} />
       </Route>
     </Routes>
   );
