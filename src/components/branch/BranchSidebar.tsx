@@ -6,7 +6,8 @@ import {
   Bell,
   Users,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +18,7 @@ const menuItems = [
   { title: 'الموظفين', icon: Users, path: '/branch/staff' },
   { title: 'التقارير', icon: BarChart3, path: '/branch/reports' },
   { title: 'الإشعارات', icon: Bell, path: '/branch/notifications' },
+  { title: 'الإعدادات', icon: Settings, path: '/branch/settings' },
 ];
 
 export const BranchSidebar = () => {
