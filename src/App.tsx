@@ -42,15 +42,6 @@ const App = () => (
               }
             />
             
-            <Route
-              path="/admin/customers/:customerId/documents"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-            
             <Route path="/" element={<RoleBasedRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
