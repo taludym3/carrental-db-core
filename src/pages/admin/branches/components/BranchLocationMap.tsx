@@ -97,7 +97,7 @@ export function BranchLocationMap({
 
   return (
     <div className="space-y-4">
-      {!readonly && <MapboxTokenInput token={mapboxToken} onTokenChange={setMapboxToken} />}
+      <MapboxTokenInput token={mapboxToken} onTokenChange={setMapboxToken} />
 
       <div
         ref={mapRef}
@@ -110,7 +110,7 @@ export function BranchLocationMap({
               <p className="text-muted-foreground mb-2">خريطة Mapbox</p>
               <p className="text-sm text-muted-foreground">
                 {readonly 
-                  ? 'يجب إضافة رمز Mapbox لعرض الموقع' 
+                  ? 'أدخل رمز Mapbox أعلاه لعرض الموقع' 
                   : 'أدخل رمز Mapbox أعلاه لبدء تحديد الموقع'}
               </p>
               {latitude && longitude && (
