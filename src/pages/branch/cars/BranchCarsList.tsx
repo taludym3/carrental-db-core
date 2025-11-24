@@ -8,12 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, Plus, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const BranchCarsList = () => {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -82,9 +82,17 @@ const BranchCarsList = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">إدارة السيارات</h1>
-        <p className="text-muted-foreground">قائمة سيارات الفرع</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">إدارة السيارات</h1>
+          <p className="text-muted-foreground">قائمة سيارات الفرع</p>
+        </div>
+        {role === 'branch' && (
+          <Button onClick={() => navigate('/branch/cars/add')}>
+            <Plus className="h-4 w-4 ml-2" />
+            إضافة سيارة
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -162,14 +170,24 @@ const BranchCarsList = () => {
                     <TableCell>{car.available_quantity} من {car.quantity}</TableCell>
                     <TableCell>{getStatusBadge(car.status)}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/branch/cars/${car.id}`)}
-                      >
-                        <Eye className="h-4 w-4 ml-2" />
-                        عرض
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/branch/cars/${car.id}`)}
+                        >
+                          <Eye className="h-4 w-4 ml-2" />
+                          عرض
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/branch/cars/${car.id}/edit`)}
+                        >
+                          <Pencil className="h-4 w-4 ml-2" />
+                          تعديل
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
