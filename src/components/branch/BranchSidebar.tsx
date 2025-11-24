@@ -4,6 +4,7 @@ import {
   Car, 
   Calendar, 
   Bell,
+  Users,
   ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,6 +13,7 @@ const menuItems = [
   { title: 'لوحة التحكم', icon: LayoutDashboard, path: '/branch' },
   { title: 'السيارات', icon: Car, path: '/branch/cars' },
   { title: 'الحجوزات', icon: Calendar, path: '/branch/bookings' },
+  { title: 'الموظفين', icon: Users, path: '/branch/staff' },
   { title: 'الإشعارات', icon: Bell, path: '/branch/notifications' },
 ];
 
