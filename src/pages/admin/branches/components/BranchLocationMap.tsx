@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -18,50 +18,54 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-function MapUpdater({ center }: { center: [number, number] }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.flyTo(center, 12);
-  }, [center, map]);
-
-  return null;
-}
-
-function LocationMarker({
+function MapController({
+  center,
   position,
   onLocationChange,
   readonly,
 }: {
+  center: [number, number];
   position: [number, number];
   onLocationChange?: (lat: number, lng: number) => void;
   readonly: boolean;
 }) {
-  const markerRef = useRef<L.Marker | null>(null);
+  const map = useMap();
+  const [markerPosition, setMarkerPosition] = useState<[number, number]>(position);
+
+  useEffect(() => {
+    map.flyTo(center, 12);
+  }, [center, map]);
+
+  useEffect(() => {
+    setMarkerPosition(position);
+  }, [position]);
 
   useMapEvents({
     click(e) {
       if (!readonly && onLocationChange) {
+        const newPos: [number, number] = [e.latlng.lat, e.latlng.lng];
+        setMarkerPosition(newPos);
         onLocationChange(e.latlng.lat, e.latlng.lng);
       }
     },
   });
 
-  useEffect(() => {
-    const marker = markerRef.current;
-    if (marker && !readonly) {
-      marker.on('dragend', () => {
-        const pos = marker.getLatLng();
-        onLocationChange?.(pos.lat, pos.lng);
-      });
+  const handleDragEnd = (e: L.DragEndEvent) => {
+    if (!readonly && onLocationChange) {
+      const marker = e.target as L.Marker;
+      const pos = marker.getLatLng();
+      setMarkerPosition([pos.lat, pos.lng]);
+      onLocationChange(pos.lat, pos.lng);
     }
-  }, [readonly, onLocationChange]);
+  };
 
   return (
     <Marker
-      position={position}
+      position={markerPosition}
       draggable={!readonly}
-      ref={markerRef}
+      eventHandlers={{
+        dragend: handleDragEnd,
+      }}
     />
   );
 }
@@ -87,8 +91,8 @@ export function BranchLocationMap({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MapUpdater center={position} />
-          <LocationMarker
+          <MapController
+            center={position}
             position={position}
             onLocationChange={onLocationChange}
             readonly={readonly}
