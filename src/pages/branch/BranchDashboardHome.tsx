@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Car, Calendar, FileCheck, TrendingUp } from 'lucide-react';
+import { Car, Calendar, TrendingUp } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -35,10 +35,9 @@ const BranchDashboardHome = () => {
     queryFn: async () => {
       if (!profile?.branch_id) return null;
 
-      const [carsResult, bookingsResult, documentsResult] = await Promise.all([
+      const [carsResult, bookingsResult] = await Promise.all([
         supabase.from('cars').select('id', { count: 'exact' }).eq('branch_id', profile.branch_id),
         supabase.from('bookings').select('id, final_amount', { count: 'exact' }).eq('branch_id', profile.branch_id).eq('status', 'active'),
-        supabase.from('documents').select('id', { count: 'exact' }).eq('status', 'pending'),
       ]);
 
       const totalRevenue = bookingsResult.data?.reduce((sum, booking) => sum + Number(booking.final_amount || 0), 0) || 0;
@@ -46,7 +45,6 @@ const BranchDashboardHome = () => {
       return {
         totalCars: carsResult.count || 0,
         activeBookings: bookingsResult.count || 0,
-        pendingDocuments: documentsResult.count || 0,
         totalRevenue,
       };
     },
@@ -122,7 +120,7 @@ const BranchDashboardHome = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -153,24 +151,6 @@ const BranchDashboardHome = () => {
                   <Skeleton className="h-8 w-16" />
                 ) : (
                   <p className="text-2xl font-bold">{stats?.activeBookings || 0}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <FileCheck className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">مستندات معلقة</p>
-                {statsLoading ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <p className="text-2xl font-bold">{stats?.pendingDocuments || 0}</p>
                 )}
               </div>
             </div>

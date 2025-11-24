@@ -3,7 +3,6 @@ import {
   LayoutDashboard, 
   Car, 
   Calendar, 
-  FileText, 
   Bell,
   ChevronRight
 } from 'lucide-react';
@@ -13,7 +12,6 @@ const menuItems = [
   { title: 'لوحة التحكم', icon: LayoutDashboard, path: '/branch' },
   { title: 'السيارات', icon: Car, path: '/branch/cars' },
   { title: 'الحجوزات', icon: Calendar, path: '/branch/bookings' },
-  { title: 'المستندات', icon: FileText, path: '/branch/documents' },
   { title: 'الإشعارات', icon: Bell, path: '/branch/notifications' },
 ];
 
