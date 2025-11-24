@@ -29,7 +29,7 @@ import BookingsList from './bookings/BookingsList';
 import BookingDetails from './bookings/BookingDetails';
 import NotificationsList from './notifications/NotificationsList';
 import NotificationsSend from './notifications/NotificationsSend';
-import DocumentsList from './documents/DocumentsList';
+import DocumentsListGrouped from './documents/DocumentsListGrouped';
 import DocumentDetails from './documents/DocumentDetails';
 import AnnouncementsList from './announcements/AnnouncementsList';
 import AnnouncementsAdd from './announcements/AnnouncementsAdd';
@@ -80,7 +80,7 @@ const AdminDashboard = () => {
           <Route path="notifications" element={<NotificationsList />} />
           <Route path="notifications/send" element={<NotificationsSend />} />
           
-          <Route path="documents" element={<DocumentsList />} />
+          <Route path="documents" element={<DocumentsListGrouped />} />
           <Route path="documents/:id" element={<DocumentDetails />} />
           <Route path="customers/:customerId/documents" element={<CustomerDocumentsReview />} />
           
