@@ -180,7 +180,10 @@ const DocumentsListGrouped = () => {
                               </div>
                             </div>
                           )}
-                          <Button onClick={(e) => e.stopPropagation()}>
+                          <Button onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/admin/customers/${group.customerId}/documents`);
+                          }}>
                             <Eye className="ml-2 h-4 w-4" />
                             مراجعة المستندات
                           </Button>
