@@ -29,11 +29,13 @@ type DocumentStatus = Database['public']['Enums']['document_status'];
 interface ChangeDocumentStatusDialogProps {
   documentId: string;
   currentStatus: DocumentStatus;
+  onSuccess?: () => void;
 }
 
 export const ChangeDocumentStatusDialog = ({ 
   documentId, 
-  currentStatus 
+  currentStatus,
+  onSuccess: onSuccessCallback
 }: ChangeDocumentStatusDialogProps) => {
   const [open, setOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<DocumentStatus>(currentStatus);
@@ -56,6 +58,7 @@ export const ChangeDocumentStatusDialog = ({
       setReason('');
       queryClient.invalidateQueries({ queryKey: ['document-details', documentId] });
       queryClient.invalidateQueries({ queryKey: ['admin-documents'] });
+      onSuccessCallback?.();
     },
     onError: (error: any) => {
       toast.error(error.message || 'فشل تحديث حالة المستند');

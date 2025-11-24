@@ -93,6 +93,7 @@ export function DocumentReviewCard({
             <ChangeDocumentStatusDialog 
               documentId={document.id} 
               currentStatus={status}
+              onSuccess={onStatusChange}
             />
           </div>
         )}
@@ -118,6 +119,7 @@ export function DocumentReviewCard({
             <ChangeDocumentStatusDialog 
               documentId={document.id} 
               currentStatus={status}
+              onSuccess={onStatusChange}
             />
           </div>
         )}
