@@ -2731,6 +2731,7 @@ export type Database = {
         }
         Returns: {
           available_quantity: number
+          branch_id: string
           branch_name_ar: string
           branch_name_en: string
           brand_name_ar: string
@@ -2738,19 +2739,26 @@ export type Database = {
           color_name_ar: string
           color_name_en: string
           daily_price: number
+          default_image_url: string
+          discount_percentage: number
           features_ar: string[]
           features_en: string[]
           fuel_type: string
           id: string
+          is_new: boolean
+          mileage: number
           model_name_ar: string
           model_name_en: string
           monthly_price: number
+          offer_expires_at: string
           relevance_score: number
+          rental_types: Database["public"]["Enums"]["rental_type"][]
           seats: number
-          status: string
+          status: Database["public"]["Enums"]["car_status"]
           total_results: number
           transmission: string
           weekly_price: number
+          year: number
         }[]
       }
       search_models:
