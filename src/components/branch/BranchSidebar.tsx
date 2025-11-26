@@ -7,7 +7,8 @@ import {
   Users,
   ChevronRight,
   BarChart3,
-  Settings
+  Settings,
+  UserCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,7 @@ const menuItems = [
   { title: 'الموظفين', icon: Users, path: '/branch/staff' },
   { title: 'التقارير', icon: BarChart3, path: '/branch/reports' },
   { title: 'الإشعارات', icon: Bell, path: '/branch/notifications' },
+  { title: 'الملف الشخصي', icon: UserCircle, path: '/branch/profile' },
   { title: 'الإعدادات', icon: Settings, path: '/branch/settings' },
 ];
 

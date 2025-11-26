@@ -43,6 +43,7 @@ import PaymentsList from './payments/PaymentsList';
 import PaymentDetails from './payments/PaymentDetails';
 import ReportsDashboard from './reports/ReportsDashboard';
 import CustomerDocumentsReview from './documents/CustomerDocumentsReview';
+import Profile from '../Profile';
 
 const AdminDashboard = () => {
   return (
@@ -97,6 +98,7 @@ const AdminDashboard = () => {
           <Route path="payments" element={<PaymentsList />} />
           <Route path="payments/:id" element={<PaymentDetails />} />
           <Route path="reports" element={<ReportsDashboard />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
   );

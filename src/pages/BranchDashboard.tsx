@@ -11,6 +11,7 @@ import BranchStaffList from './branch/staff/BranchStaffList';
 import BranchNotificationsList from './branch/notifications/BranchNotificationsList';
 import BranchReportsDashboard from './branch/reports/BranchReportsDashboard';
 import BranchSettings from './branch/settings/BranchSettings';
+import Profile from './Profile';
 
 const BranchDashboard = () => {
   return (
@@ -27,6 +28,7 @@ const BranchDashboard = () => {
         <Route path="notifications" element={<BranchNotificationsList />} />
         <Route path="reports" element={<BranchReportsDashboard />} />
         <Route path="settings" element={<BranchSettings />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
     </Routes>
   );
