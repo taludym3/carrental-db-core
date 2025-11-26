@@ -20,6 +20,7 @@ import {
   FileSearch,
   Settings,
   X,
+  UserCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -47,6 +48,7 @@ const menuItems = [
   { icon: BarChart3, label: "التقارير", href: "/admin/reports" },
   { icon: Shield, label: "الأمان", href: "/admin/security" },
   { icon: FileSearch, label: "سجل الأنشطة", href: "/admin/audit-logs" },
+  { icon: UserCircle, label: "الملف الشخصي", href: "/admin/profile" },
   { icon: Settings, label: "الإعدادات", href: "/admin/settings" },
 ];
 
