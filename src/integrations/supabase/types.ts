@@ -2376,6 +2376,22 @@ export type Database = {
           user_phone: string
         }[]
       }
+      get_recent_bookings_admin: {
+        Args: { p_limit?: number }
+        Returns: {
+          booking_id: string
+          branch_name_ar: string
+          car_brand_ar: string
+          car_model_ar: string
+          created_at: string
+          customer_email: string
+          customer_name: string
+          end_date: string
+          final_amount: number
+          start_date: string
+          status: Database["public"]["Enums"]["booking_status"]
+        }[]
+      }
       get_revenue_report: {
         Args: {
           p_branch_id?: string

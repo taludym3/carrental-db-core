@@ -66,24 +66,10 @@ const DashboardHome = () => {
   const { data: recentBookings, isLoading: isLoadingBookings } = useQuery({
     queryKey: ['recent-bookings'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('bookings')
-        .select(`
-          id,
-          start_date,
-          end_date,
-          status,
-          final_amount,
-          customer:profiles!customer_id(full_name),
-          car:cars(
-            model:car_models(
-              name_ar,
-              brand:car_brands(name_ar)
-            )
-          )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      const { data, error } = await supabase.rpc('get_recent_bookings_admin', {
+        p_limit: 5
+      });
+      if (error) throw error;
       return data || [];
     },
   });
@@ -241,10 +227,10 @@ const DashboardHome = () => {
               </TableHeader>
               <TableBody>
                 {recentBookings.map((booking: any) => (
-                  <TableRow key={booking.id}>
-                    <TableCell>{booking.customer?.full_name || 'غير محدد'}</TableCell>
+                  <TableRow key={booking.booking_id}>
+                    <TableCell>{booking.customer_name}</TableCell>
                     <TableCell>
-                      {booking.car?.model?.brand?.name_ar} {booking.car?.model?.name_ar}
+                      {booking.car_brand_ar} {booking.car_model_ar}
                     </TableCell>
                     <TableCell>
                       {new Date(booking.start_date).toLocaleDateString('ar-SA')}
