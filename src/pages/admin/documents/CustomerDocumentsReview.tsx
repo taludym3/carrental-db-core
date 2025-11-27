@@ -90,8 +90,8 @@ export default function CustomerDocumentsReview() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["customer-documents"] });
-      queryClient.invalidateQueries({ queryKey: ["documents-by-status"] });
+      queryClient.invalidateQueries({ queryKey: ["customer-documents"], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ["documents-by-status"], refetchType: 'active' });
       setSelectedDocuments([]);
       toast.success("تم تحديث المستندات بنجاح");
     },
@@ -269,8 +269,8 @@ export default function CustomerDocumentsReview() {
               isSelected={selectedDocuments.includes(document.id)}
               onSelect={handleSelectDocument}
               onStatusChange={() => {
-                queryClient.invalidateQueries({ queryKey: ["customer-documents"] });
-                queryClient.invalidateQueries({ queryKey: ["documents-by-status"] });
+                queryClient.invalidateQueries({ queryKey: ["customer-documents"], refetchType: 'active' });
+                queryClient.invalidateQueries({ queryKey: ["documents-by-status"], refetchType: 'active' });
               }}
             />
           ))}

@@ -2244,12 +2244,15 @@ export type Database = {
         Args: { _limit?: number; _user_lat: number; _user_lon: number }
         Returns: {
           actual_available_quantity: number
-          branch_location: string
-          branch_name: string
-          car_brand: string
-          car_color: string
+          branch_location_ar: string
+          branch_location_en: string
+          branch_name_ar: string
+          branch_name_en: string
+          brand_name_ar: string
+          brand_name_en: string
           car_id: string
-          car_model: string
+          color_name_ar: string
+          color_name_en: string
           daily_price: number
           discount_percentage: number
           distance_km: number
@@ -2257,6 +2260,8 @@ export type Database = {
           fuel_type: string
           is_new: boolean
           main_image_url: string
+          model_name_ar: string
+          model_name_en: string
           seats: number
           transmission: string
         }[]

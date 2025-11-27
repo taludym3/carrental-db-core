@@ -37,8 +37,8 @@ export const ApproveBookingDialog = ({ bookingId }: ApproveBookingDialogProps) =
     onSuccess: () => {
       toast.success('تم قبول الحجز بنجاح');
       setOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['booking-details', bookingId] });
-      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking-details', bookingId], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'], refetchType: 'active' });
     },
     onError: (error: any) => {
       toast.error(error.message || 'فشل قبول الحجز');
