@@ -35,8 +35,8 @@ export const ApproveDocumentDialog = ({ documentId }: ApproveDocumentDialogProps
     onSuccess: () => {
       toast.success('تم قبول المستند');
       setOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['document-details', documentId] });
-      queryClient.invalidateQueries({ queryKey: ['admin-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['document-details', documentId], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['admin-documents'], refetchType: 'active' });
     },
     onError: (error: any) => {
       toast.error(error.message || 'فشل قبول المستند');

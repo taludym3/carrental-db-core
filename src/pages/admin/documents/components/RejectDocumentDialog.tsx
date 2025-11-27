@@ -38,8 +38,8 @@ export const RejectDocumentDialog = ({ documentId }: RejectDocumentDialogProps) 
       toast.success('تم رفض المستند');
       setOpen(false);
       setReason('');
-      queryClient.invalidateQueries({ queryKey: ['document-details', documentId] });
-      queryClient.invalidateQueries({ queryKey: ['admin-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['document-details', documentId], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['admin-documents'], refetchType: 'active' });
     },
     onError: (error: any) => {
       toast.error(error.message || 'فشل رفض المستند');

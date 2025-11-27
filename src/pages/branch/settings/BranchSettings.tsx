@@ -369,7 +369,7 @@ export default function BranchSettings() {
             <MultiImageUploader
               currentImages={images}
               onImagesChange={setImages}
-              bucket="branches"
+              bucket="branch-images"
               folder="branch-images"
               maxImages={10}
             />
