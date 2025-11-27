@@ -22,6 +22,8 @@ import { ArrowLeft, Save } from 'lucide-react';
 import { ManagerSelect } from './components/ManagerSelect';
 import { BranchLocationMap } from './components/BranchLocationMap';
 import { MultiImageUploader } from '@/components/admin/MultiImageUploader';
+import { WorkingHoursSelector } from '@/components/admin/WorkingHoursSelector';
+import { SaudiCitiesSelector } from '@/components/admin/SaudiCitiesSelector';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 
@@ -295,10 +297,9 @@ export default function BranchEdit() {
                   <FormItem>
                     <FormLabel>ساعات العمل</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="مثال: السبت - الخميس: 8 صباحاً - 10 مساءً"
-                        rows={3}
-                        {...field}
+                      <WorkingHoursSelector
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -313,33 +314,12 @@ export default function BranchEdit() {
             <CardContent className="pt-6 space-y-4">
               <h3 className="text-lg font-semibold mb-4">الموقع</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="location_en"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>العنوان بالإنجليزية *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location_ar"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>العنوان بالعربية</FormLabel>
-                      <FormControl>
-                        <Input placeholder="العنوان" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div>
+                <SaudiCitiesSelector
+                  locationAr={form.watch('location_ar') || ''}
+                  locationEn={form.watch('location_en') || ''}
+                  onLocationArChange={(value) => form.setValue('location_ar', value)}
+                  onLocationEnChange={(value) => form.setValue('location_en', value)}
                 />
               </div>
 
@@ -419,8 +399,8 @@ export default function BranchEdit() {
                       <MultiImageUploader
                         currentImages={field.value || []}
                         onImagesChange={field.onChange}
-                        bucket="branches"
-                        folder="branches"
+                        bucket="branch-images"
+                        folder="branch-images"
                       />
                     </FormControl>
                     <FormMessage />

@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MultiImageUploader } from '@/components/admin/MultiImageUploader';
 import { BranchLocationMap } from '@/pages/admin/branches/components/BranchLocationMap';
+import { WorkingHoursSelector } from '@/components/admin/WorkingHoursSelector';
+import { SaudiCitiesSelector } from '@/components/admin/SaudiCitiesSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Save } from 'lucide-react';
 
@@ -51,6 +53,7 @@ export default function BranchSettings() {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<BranchSettingsFormData>({
     resolver: zodResolver(branchSettingsSchema),
   });
@@ -278,11 +281,10 @@ export default function BranchSettings() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="working_hours">ساعات العمل</Label>
-              <Input
-                id="working_hours"
-                {...register('working_hours')}
-                placeholder="السبت - الخميس: 8 صباحاً - 10 مساءً"
+              <Label>ساعات العمل</Label>
+              <WorkingHoursSelector
+                value={watch('working_hours') || ''}
+                onChange={(value) => setValue('working_hours', value)}
               />
             </div>
           </CardContent>
@@ -294,30 +296,13 @@ export default function BranchSettings() {
             <CardTitle>الموقع</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="location_ar">الموقع (عربي) *</Label>
-                <Input
-                  id="location_ar"
-                  {...register('location_ar')}
-                  placeholder="الرياض، شارع الملك فهد"
-                />
-                {errors.location_ar && (
-                  <p className="text-sm text-destructive">{errors.location_ar.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="location_en">الموقع (إنجليزي) *</Label>
-                <Input
-                  id="location_en"
-                  {...register('location_en')}
-                  placeholder="Riyadh, King Fahd Road"
-                />
-                {errors.location_en && (
-                  <p className="text-sm text-destructive">{errors.location_en.message}</p>
-                )}
-              </div>
+            <div>
+              <SaudiCitiesSelector
+                locationAr={watch('location_ar') || ''}
+                locationEn={watch('location_en') || ''}
+                onLocationArChange={(value) => setValue('location_ar', value)}
+                onLocationEnChange={(value) => setValue('location_en', value)}
+              />
             </div>
 
             <div className="space-y-2">
