@@ -9,6 +9,28 @@ import { ArrowRight, Edit, Mail, Phone, MapPin, Calendar, Shield, Building2, Loa
 
 type UserRole = 'admin' | 'branch' | 'branch_employee' | 'customer';
 
+interface UserDetails {
+  user_id: string;
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  is_verified: boolean | null;
+  phone_verified_at: string | null;
+  created_at: string;
+  gender: string | null;
+  age: number | null;
+  location: string | null;
+  role: UserRole | null;
+  branch: {
+    id: string;
+    name_ar: string | null;
+    name_en: string;
+    location_ar: string | null;
+    location_en: string;
+  } | null;
+}
+
 const roleLabels: Record<UserRole, string> = {
   admin: 'مدير النظام',
   branch: 'مدير فرع',
@@ -23,24 +45,12 @@ export default function UserDetails() {
   const { data: user, isLoading } = useQuery({
     queryKey: ['user-details', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          *,
-          branches (
-            id,
-            name_ar,
-            location_ar
-          ),
-          user_roles (
-            role
-          )
-        `)
-        .eq('user_id', id)
-        .single();
-
+      const { data, error } = await supabase.rpc('get_user_details', {
+        p_user_id: id
+      });
+      
       if (error) throw error;
-      return data;
+      return data as unknown as UserDetails;
     },
   });
 
@@ -60,7 +70,7 @@ export default function UserDetails() {
     );
   }
 
-  const role = (user.user_roles as any)?.[0]?.role as UserRole | undefined;
+  const role = user.role;
 
   return (
     <div className="space-y-6">
@@ -181,7 +191,7 @@ export default function UserDetails() {
           </div>
 
           {/* Branch Info (if applicable) */}
-          {user.branches && (
+          {user.branch && (
             <>
               <Separator />
               <div>
@@ -191,11 +201,11 @@ export default function UserDetails() {
                     <Building2 className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium">{user.branches.name_ar}</p>
-                    {user.branches.location_ar && (
+                    <p className="font-medium">{user.branch.name_ar || user.branch.name_en}</p>
+                    {(user.branch.location_ar || user.branch.location_en) && (
                       <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                         <MapPin className="h-3 w-3" />
-                        {user.branches.location_ar}
+                        {user.branch.location_ar || user.branch.location_en}
                       </p>
                     )}
                   </div>

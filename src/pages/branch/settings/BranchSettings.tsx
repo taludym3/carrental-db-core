@@ -345,7 +345,8 @@ export default function BranchSettings() {
           </CardContent>
         </Card>
 
-        {/* الصور */}
+        {/* الصور - مخفية مؤقتاً، سيتم تفعيلها لاحقاً */}
+        {/* 
         <Card>
           <CardHeader>
             <CardTitle>صور الفرع</CardTitle>
@@ -360,6 +361,7 @@ export default function BranchSettings() {
             />
           </CardContent>
         </Card>
+        */}
 
         {/* أزرار الحفظ */}
         <div className="flex justify-end gap-4">

@@ -102,10 +102,16 @@ export function DocumentReviewCard({
         {isPending && (
           <div className="flex gap-2">
             <div className="flex-1">
-              <ApproveDocumentDialog documentId={document.id} />
+              <ApproveDocumentDialog 
+                documentId={document.id}
+                onSuccess={onStatusChange}
+              />
             </div>
             <div className="flex-1">
-              <RejectDocumentDialog documentId={document.id} />
+              <RejectDocumentDialog 
+                documentId={document.id}
+                onSuccess={onStatusChange}
+              />
             </div>
           </div>
         )}
