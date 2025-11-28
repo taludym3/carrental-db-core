@@ -18,9 +18,10 @@ import { toast } from 'sonner';
 
 interface RejectDocumentDialogProps {
   documentId: string;
+  onSuccess?: () => void;
 }
 
-export const RejectDocumentDialog = ({ documentId }: RejectDocumentDialogProps) => {
+export const RejectDocumentDialog = ({ documentId, onSuccess }: RejectDocumentDialogProps) => {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const queryClient = useQueryClient();
@@ -38,8 +39,10 @@ export const RejectDocumentDialog = ({ documentId }: RejectDocumentDialogProps) 
       toast.success('تم رفض المستند');
       setOpen(false);
       setReason('');
-      queryClient.invalidateQueries({ queryKey: ['document-details', documentId], refetchType: 'active' });
-      queryClient.invalidateQueries({ queryKey: ['admin-documents'], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['document-details', documentId], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['admin-documents'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['customer-documents'], refetchType: 'all' });
+      onSuccess?.();
     },
     onError: (error: any) => {
       toast.error(error.message || 'فشل رفض المستند');

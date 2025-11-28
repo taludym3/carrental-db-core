@@ -18,9 +18,10 @@ import { toast } from 'sonner';
 
 interface ApproveDocumentDialogProps {
   documentId: string;
+  onSuccess?: () => void;
 }
 
-export const ApproveDocumentDialog = ({ documentId }: ApproveDocumentDialogProps) => {
+export const ApproveDocumentDialog = ({ documentId, onSuccess }: ApproveDocumentDialogProps) => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -35,8 +36,10 @@ export const ApproveDocumentDialog = ({ documentId }: ApproveDocumentDialogProps
     onSuccess: () => {
       toast.success('تم قبول المستند');
       setOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['document-details', documentId], refetchType: 'active' });
-      queryClient.invalidateQueries({ queryKey: ['admin-documents'], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['document-details', documentId], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['admin-documents'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['customer-documents'], refetchType: 'all' });
+      onSuccess?.();
     },
     onError: (error: any) => {
       toast.error(error.message || 'فشل قبول المستند');
