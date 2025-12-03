@@ -2508,6 +2508,10 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       gettransactionid: { Args: never; Returns: unknown }
+      handle_booking_refund: {
+        Args: { p_booking_id: string; p_payment_id?: string; p_user_id: string }
+        Returns: Json
+      }
       handle_payment_failure_transaction: {
         Args: {
           p_booking_id: string
