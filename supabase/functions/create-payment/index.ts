@@ -249,12 +249,13 @@ serve(async (req) => {
 
     // ⚠️ Unknown status
     throw new Error(`Unknown payment status: ${moyasarResult.status}`);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("❌ Error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || "Internal server error",
+        error: errorMessage,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
