@@ -1,23 +1,30 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
   const [loading, setLoading] = useState(false);
   const { signUp, user, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }
+  });
 
   // توجيه المستخدم المسجل بالفعل إلى صفحته
   useEffect(() => {
@@ -36,30 +43,12 @@ const Register = () => {
     }
   }, [user, role, authLoading, navigate]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!formData.email || !formData.password) {
-      toast.error('يرجى ملء جميع الحقول المطلوبة');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('كلمة المرور غير متطابقة');
-      return;
-    }
-    
-    if (formData.password.length < 6) {
-      toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-      return;
-    }
-
+  const onSubmit = async (data: RegisterFormData) => {
     setLoading(true);
     const { error } = await signUp(
-      formData.email, 
-      formData.password, 
-      formData.fullName || undefined
+      data.email, 
+      data.password, 
+      data.fullName || undefined
     );
     setLoading(false);
 
@@ -100,97 +89,124 @@ const Register = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name Field (Optional) */}
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                الاسم الكامل (اختياري)
-              </Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="أحمد محمد"
-                value={formData.fullName}
-                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                disabled={loading}
-                className="h-11"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Full Name Field (Optional) */}
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      الاسم الكامل (اختياري)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="أحمد محمد"
+                        disabled={loading}
+                        className="h-11"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                البريد الإلكتروني *
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="example@leago.com"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                disabled={loading}
-                required
-                className="h-11"
+              {/* Email Field */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      البريد الإلكتروني *
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="example@leago.com"
+                        disabled={loading}
+                        className="h-11"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center gap-2">
-                <Lock className="h-4 w-4" />
-                كلمة المرور *
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                disabled={loading}
-                required
-                className="h-11"
+              {/* Password Field */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      كلمة المرور *
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        disabled={loading}
+                        className="h-11"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-xs text-muted-foreground">
+                      يجب أن تكون 6 أحرف على الأقل
+                    </p>
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-muted-foreground">
-                يجب أن تكون 6 أحرف على الأقل
-              </p>
-            </div>
 
-            {/* Confirm Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="flex items-center gap-2">
-                <Lock className="h-4 w-4" />
-                تأكيد كلمة المرور *
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                disabled={loading}
-                required
-                className="h-11"
+              {/* Confirm Password Field */}
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      تأكيد كلمة المرور *
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        disabled={loading}
+                        className="h-11"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Submit Button */}
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-base font-semibold"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                  جاري التسجيل...
-                </>
-              ) : (
-                'إنشاء حساب'
-              )}
-            </Button>
-          </form>
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-semibold"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                    جاري التسجيل...
+                  </>
+                ) : (
+                  'إنشاء حساب'
+                )}
+              </Button>
+            </form>
+          </Form>
 
           {/* Footer */}
           <div className="mt-6 text-center text-sm">
