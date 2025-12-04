@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate, useParams } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/admin/PageHeader";
 
 const formSchema = z.object({
@@ -20,7 +20,6 @@ const formSchema = z.object({
 export default function FeatureEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,11 +51,7 @@ export default function FeatureEdit() {
         is_active: data.is_active,
       });
     } catch (error: any) {
-      toast({
-        title: "خطأ في تحميل البيانات",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في تحميل البيانات");
     } finally {
       setLoading(false);
     }
@@ -71,18 +66,10 @@ export default function FeatureEdit() {
 
       if (error) throw error;
 
-      toast({
-        title: "تم التحديث بنجاح",
-        description: "تم تحديث الميزة بنجاح",
-      });
-
+      toast.success("تم تحديث الميزة بنجاح");
       navigate("/admin/features");
     } catch (error: any) {
-      toast({
-        title: "خطأ في التحديث",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في التحديث");
     }
   };
 

@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useParams } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Pencil, ArrowRight } from "lucide-react";
 
 type Feature = {
@@ -18,7 +18,6 @@ type Feature = {
 export default function FeatureDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [feature, setFeature] = useState<Feature | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,11 +36,7 @@ export default function FeatureDetails() {
       if (error) throw error;
       setFeature(data);
     } catch (error: any) {
-      toast({
-        title: "خطأ في تحميل البيانات",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في تحميل البيانات");
     } finally {
       setLoading(false);
     }

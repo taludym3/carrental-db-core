@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -28,7 +28,6 @@ const statusLabels = {
 export default function CarDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [car, setCar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -51,7 +50,7 @@ export default function CarDetails() {
       if (error) throw error;
       setActualAvailableQty(data || 0);
     } catch (error: any) {
-      console.error('Error fetching actual available quantity:', error);
+      // Silent fail for availability fetch
     }
   };
 
@@ -71,11 +70,7 @@ export default function CarDetails() {
       if (error) throw error;
       setCar(data);
     } catch (error: any) {
-      toast({
-        title: "خطأ في تحميل البيانات",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في تحميل البيانات");
     } finally {
       setLoading(false);
     }
@@ -99,11 +94,7 @@ export default function CarDetails() {
 
   const handleDelete = async () => {
     if (activeBookingsCount > 0) {
-      toast({
-        title: "لا يمكن الحذف",
-        description: `هذه السيارة لديها ${activeBookingsCount} حجز نشط`,
-        variant: "destructive",
-      });
+      toast.error(`هذه السيارة لديها ${activeBookingsCount} حجز نشط`);
       setDeleteDialogOpen(false);
       return;
     }
@@ -117,18 +108,10 @@ export default function CarDetails() {
 
       if (error) throw error;
 
-      toast({
-        title: "تم الحذف",
-        description: "تم حذف السيارة بنجاح",
-      });
-
+      toast.success("تم حذف السيارة بنجاح");
       navigate("/admin/cars");
     } catch (error: any) {
-      toast({
-        title: "خطأ في الحذف",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في الحذف");
     } finally {
       setDeleteDialogOpen(false);
     }
@@ -454,23 +437,19 @@ export default function CarDetails() {
           <AlertDialogHeader>
             <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
             <AlertDialogDescription>
-              {activeBookingsCount > 0 ? (
-                <div className="space-y-2">
-                  <p className="text-destructive font-medium">
-                    هذه السيارة لديها {activeBookingsCount} حجز نشط!
-                  </p>
-                  <p>لا يمكن حذف السيارة.</p>
-                </div>
-              ) : (
-                <p>هل أنت متأكد من حذف هذه السيارة؟</p>
+              هل أنت متأكد من حذف هذه السيارة؟ سيتم حذف جميع البيانات المرتبطة بها.
+              {activeBookingsCount > 0 && (
+                <span className="block mt-2 text-destructive font-medium">
+                  تحذير: هذه السيارة لديها {activeBookingsCount} حجز نشط!
+                </span>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            {activeBookingsCount === 0 && (
-              <AlertDialogAction onClick={handleDelete}>حذف</AlertDialogAction>
-            )}
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              حذف
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

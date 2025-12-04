@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Eye, Pencil, Trash2, Plus, Search } from "lucide-react";
 
@@ -25,7 +25,6 @@ export default function FeaturesList() {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,11 +46,7 @@ export default function FeaturesList() {
       if (error) throw error;
       setFeatures(data || []);
     } catch (error: any) {
-      toast({
-        title: "خطأ في تحميل البيانات",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في تحميل البيانات");
     } finally {
       setLoading(false);
     }
@@ -81,18 +76,10 @@ export default function FeaturesList() {
 
       if (error) throw error;
 
-      toast({
-        title: "تم الحذف",
-        description: "تم حذف الميزة بنجاح",
-      });
-
+      toast.success("تم حذف الميزة بنجاح");
       fetchFeatures();
     } catch (error: any) {
-      toast({
-        title: "خطأ في الحذف",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في الحذف");
     } finally {
       setDeleteDialogOpen(false);
       setSelectedFeature(null);

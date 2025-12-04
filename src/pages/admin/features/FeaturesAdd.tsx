@@ -7,7 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/admin/PageHeader";
 
 const formSchema = z.object({
@@ -18,7 +18,6 @@ const formSchema = z.object({
 
 export default function FeaturesAdd() {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,18 +40,10 @@ export default function FeaturesAdd() {
 
       if (error) throw error;
 
-      toast({
-        title: "تمت الإضافة بنجاح",
-        description: "تم إضافة الميزة بنجاح",
-      });
-
+      toast.success("تم إضافة الميزة بنجاح");
       navigate("/admin/features");
     } catch (error: any) {
-      toast({
-        title: "خطأ في الإضافة",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في الإضافة");
     }
   };
 

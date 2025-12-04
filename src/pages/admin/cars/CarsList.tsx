@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Eye, Pencil, Trash2, Plus, Filter, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -95,7 +95,6 @@ export default function CarsList() {
   const [branches, setBranches] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
 
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -118,11 +117,7 @@ export default function CarsList() {
       if (error) throw error;
       setCars((data || []) as any[]);
     } catch (error: any) {
-      toast({
-        title: "خطأ في تحميل البيانات",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في تحميل البيانات");
     } finally {
       setLoading(false);
     }
@@ -189,11 +184,7 @@ export default function CarsList() {
     if (!selectedCar) return;
 
     if (activeBookingsCount > 0) {
-      toast({
-        title: "لا يمكن الحذف",
-        description: `هذه السيارة لديها ${activeBookingsCount} حجز نشط. يمكنك إخفاء السيارة بدلاً من حذفها.`,
-        variant: "destructive",
-      });
+      toast.error(`هذه السيارة لديها ${activeBookingsCount} حجز نشط. يمكنك إخفاء السيارة بدلاً من حذفها.`);
       setDeleteDialogOpen(false);
       return;
     }
@@ -207,18 +198,10 @@ export default function CarsList() {
 
       if (error) throw error;
 
-      toast({
-        title: "تم الحذف",
-        description: "تم حذف السيارة بنجاح",
-      });
-
+      toast.success("تم حذف السيارة بنجاح");
       fetchCars();
     } catch (error: any) {
-      toast({
-        title: "خطأ في الحذف",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في الحذف");
     } finally {
       setDeleteDialogOpen(false);
       setSelectedCar(null);
@@ -492,7 +475,7 @@ export default function CarsList() {
                 </TableCell>
                 <TableCell>{car.daily_price} ر.س</TableCell>
                 <TableCell>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <Button size="icon" variant="ghost" onClick={() => navigate(`/admin/cars/${car.id}`)}>
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -511,21 +494,15 @@ export default function CarsList() {
       </div>
 
       {/* Mobile/Tablet Card View */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-4">
+      <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filteredCars.map((car) => (
           <CarCard key={car.id} car={car} />
         ))}
       </div>
 
-      {/* Empty State */}
       {filteredCars.length === 0 && (
-        <div className="text-center py-12 bg-card rounded-lg border">
-          <p className="text-muted-foreground">لا توجد سيارات</p>
-          {getActiveFiltersCount() > 0 && (
-            <Button variant="link" onClick={clearFilters} className="mt-2">
-              مسح الفلاتر
-            </Button>
-          )}
+        <div className="text-center py-12 text-muted-foreground">
+          لا توجد سيارات مطابقة للفلاتر المحددة
         </div>
       )}
 
@@ -535,19 +512,19 @@ export default function CarsList() {
           <AlertDialogHeader>
             <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
             <AlertDialogDescription>
-              {activeBookingsCount > 0 ? (
-                <div className="space-y-2">
-                  <p className="text-destructive font-medium">هذه السيارة لديها {activeBookingsCount} حجز نشط!</p>
-                  <p>لا يمكن حذف السيارة. يمكنك إخفاء السيارة بدلاً من حذفها لمنع ظهورها في الحجوزات الجديدة.</p>
-                </div>
-              ) : (
-                <p>هل أنت متأكد من حذف هذه السيارة؟ سيتم حذف جميع الصور المرتبطة بها.</p>
+              هل أنت متأكد من حذف هذه السيارة؟
+              {activeBookingsCount > 0 && (
+                <span className="block mt-2 text-destructive font-medium">
+                  تحذير: هذه السيارة لديها {activeBookingsCount} حجز نشط!
+                </span>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            {activeBookingsCount === 0 && <AlertDialogAction onClick={handleDelete}>حذف</AlertDialogAction>}
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              حذف
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
