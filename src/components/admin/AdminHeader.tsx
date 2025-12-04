@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Menu, LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { NotificationsDropdown } from './NotificationsDropdown';
 
 interface AdminHeaderProps {
@@ -19,10 +20,15 @@ interface AdminHeaderProps {
 
 export const AdminHeader = ({ onMenuClick }: AdminHeaderProps) => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
     toast.success('تم تسجيل الخروج بنجاح');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/admin/profile');
   };
 
   const getUserInitials = () => {
@@ -59,7 +65,7 @@ export const AdminHeader = ({ onMenuClick }: AdminHeaderProps) => {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>حسابي</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleProfileClick}>
             <User className="ml-2 h-4 w-4" />
             <span>الملف الشخصي</span>
           </DropdownMenuItem>

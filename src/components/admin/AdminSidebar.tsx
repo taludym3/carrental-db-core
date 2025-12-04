@@ -12,13 +12,9 @@ import {
   Calendar,
   CreditCard,
   Megaphone,
-  Gift,
   Wrench,
   Bell,
   BarChart3,
-  Shield,
-  FileSearch,
-  Settings,
   X,
   UserCircle,
 } from "lucide-react";
@@ -38,15 +34,14 @@ const menuItems = [
   { icon: Tag, label: "العلامات التجارية", href: "/admin/brands" },
   { icon: Palette, label: "الموديلات", href: "/admin/models" },
   { icon: PaintBucket, label: "الألوان", href: "/admin/colors" },
+  { icon: Wrench, label: "المميزات", href: "/admin/features" },
   { icon: FileText, label: "الوثائق", href: "/admin/documents" },
   { icon: Calendar, label: "الحجوزات", href: "/admin/bookings" },
   { icon: Megaphone, label: "الإعلانات", href: "/admin/announcements" },
   { icon: CreditCard, label: "المدفوعات", href: "/admin/payments" },
   { icon: Bell, label: "الإشعارات", href: "/admin/notifications" },
   { icon: BarChart3, label: "التقارير", href: "/admin/reports" },
-  { icon: FileSearch, label: "سجل الأنشطة", href: "/admin/audit-logs" },
   { icon: UserCircle, label: "الملف الشخصي", href: "/admin/profile" },
-  { icon: Settings, label: "الإعدادات", href: "/admin/settings" },
 ];
 
 export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
