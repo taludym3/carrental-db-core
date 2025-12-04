@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
 import { FeaturesMultiSelect } from "@/components/admin/FeaturesMultiSelect";
 import { Separator } from "@/components/ui/separator";
@@ -43,7 +43,6 @@ const formSchema = z.object({
 
 export default function CarsAdd() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [branches, setBranches] = useState<any[]>([]);
   const [models, setModels] = useState<any[]>([]);
@@ -120,18 +119,10 @@ export default function CarsAdd() {
         if (featuresError) throw featuresError;
       }
 
-      toast({
-        title: "تم الإضافة بنجاح",
-        description: "تم إضافة السيارة بنجاح",
-      });
-
+      toast.success("تم إضافة السيارة بنجاح");
       navigate("/admin/cars");
     } catch (error: any) {
-      toast({
-        title: "خطأ في الإضافة",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في الإضافة");
     } finally {
       setLoading(false);
     }
@@ -455,7 +446,7 @@ export default function CarsAdd() {
                       name="ownership_price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>سعر الملكية (ر.س)</FormLabel>
+                          <FormLabel>سعر التملك (ر.س)</FormLabel>
                           <FormControl>
                             <Input type="number" min="0" {...field} />
                           </FormControl>
@@ -471,7 +462,7 @@ export default function CarsAdd() {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">العروض (اختياري)</h3>
+              <h3 className="text-lg font-semibold mb-4">العروض والخصومات</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -494,7 +485,7 @@ export default function CarsAdd() {
                     <FormItem>
                       <FormLabel>تاريخ انتهاء العرض</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input type="datetime-local" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -507,31 +498,36 @@ export default function CarsAdd() {
 
             <div>
               <h3 className="text-lg font-semibold mb-4">المميزات</h3>
-              <FormItem>
-                <FormLabel>اختر المميزات</FormLabel>
-                <FormControl>
-                  <FeaturesMultiSelect
-                    selectedFeatureIds={form.watch("feature_ids")}
-                    onChange={(ids) => form.setValue("feature_ids", ids)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="feature_ids"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <FeaturesMultiSelect
+                        selectedFeatureIds={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">وصف السيارة</h3>
-              <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-4">الوصف</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="description_en"
+                  name="description_ar"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الوصف بالإنجليزية</FormLabel>
+                      <FormLabel>الوصف بالعربية</FormLabel>
                       <FormControl>
-                        <Textarea {...field} value={field.value || ""} />
+                        <Textarea {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -540,12 +536,12 @@ export default function CarsAdd() {
 
                 <FormField
                   control={form.control}
-                  name="description_ar"
+                  name="description_en"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الوصف بالعربية</FormLabel>
+                      <FormLabel>الوصف بالإنجليزية</FormLabel>
                       <FormControl>
-                        <Textarea {...field} value={field.value || ""} />
+                        <Textarea {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -557,7 +553,7 @@ export default function CarsAdd() {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">صور السيارة الإضافية</h3>
+              <h3 className="text-lg font-semibold mb-4">الصور الإضافية</h3>
               <FormField
                 control={form.control}
                 name="additional_images"
@@ -581,7 +577,7 @@ export default function CarsAdd() {
 
           <div className="flex gap-4">
             <Button type="submit" disabled={loading}>
-              {loading ? "جاري الإضافة..." : "إضافة السيارة"}
+              {loading ? "جاري الحفظ..." : "حفظ"}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate("/admin/cars")}>
               إلغاء

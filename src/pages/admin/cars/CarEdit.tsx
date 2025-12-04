@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
 import { FeaturesMultiSelect } from "@/components/admin/FeaturesMultiSelect";
 import { Separator } from "@/components/ui/separator";
@@ -44,7 +44,6 @@ const formSchema = z.object({
 export default function CarEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [branches, setBranches] = useState<any[]>([]);
@@ -120,11 +119,7 @@ export default function CarEdit() {
         additional_images: data.additional_images || [],
       });
     } catch (error: any) {
-      toast({
-        title: "خطأ في تحميل البيانات",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في تحميل البيانات");
     } finally {
       setDataLoading(false);
     }
@@ -150,18 +145,10 @@ export default function CarEdit() {
 
       if (featuresError) throw featuresError;
 
-      toast({
-        title: "تم التحديث بنجاح",
-        description: "تم تحديث بيانات السيارة بنجاح",
-      });
-
+      toast.success("تم تحديث بيانات السيارة بنجاح");
       navigate(`/admin/cars/${id}`);
     } catch (error: any) {
-      toast({
-        title: "خطأ في التحديث",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في التحديث");
     } finally {
       setLoading(false);
     }
@@ -490,7 +477,7 @@ export default function CarEdit() {
                       name="ownership_price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>سعر الملكية (ر.س)</FormLabel>
+                          <FormLabel>سعر التملك (ر.س)</FormLabel>
                           <FormControl>
                             <Input type="number" min="0" {...field} value={field.value || ""} />
                           </FormControl>
@@ -506,7 +493,7 @@ export default function CarEdit() {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">العروض (اختياري)</h3>
+              <h3 className="text-lg font-semibold mb-4">العروض والخصومات</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -529,7 +516,7 @@ export default function CarEdit() {
                     <FormItem>
                       <FormLabel>تاريخ انتهاء العرض</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} value={field.value || ""} />
+                        <Input type="datetime-local" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -542,37 +529,28 @@ export default function CarEdit() {
 
             <div>
               <h3 className="text-lg font-semibold mb-4">المميزات</h3>
-              <FormItem>
-                <FormLabel>اختر المميزات</FormLabel>
-                <FormControl>
-                  <FeaturesMultiSelect
-                    selectedFeatureIds={form.watch("feature_ids") || []}
-                    onChange={(ids) => form.setValue("feature_ids", ids)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="feature_ids"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <FeaturesMultiSelect
+                        selectedFeatureIds={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">وصف السيارة</h3>
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="description_en"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الوصف بالإنجليزية</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+              <h3 className="text-lg font-semibold mb-4">الوصف</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="description_ar"
@@ -586,13 +564,27 @@ export default function CarEdit() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="description_en"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الوصف بالإنجليزية</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">صور السيارة الإضافية</h3>
+              <h3 className="text-lg font-semibold mb-4">الصور الإضافية</h3>
               <FormField
                 control={form.control}
                 name="additional_images"
@@ -616,7 +608,7 @@ export default function CarEdit() {
 
           <div className="flex gap-4">
             <Button type="submit" disabled={loading}>
-              {loading ? "جاري التحديث..." : "تحديث السيارة"}
+              {loading ? "جاري الحفظ..." : "حفظ التعديلات"}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate(`/admin/cars/${id}`)}>
               إلغاء

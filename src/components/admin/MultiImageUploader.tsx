@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface MultiImageUploaderProps {
   currentImages: string[];
@@ -25,7 +25,6 @@ export const MultiImageUploader = ({
 }: MultiImageUploaderProps) => {
   const [uploading, setUploading] = useState(false);
   const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
-  const { toast } = useToast();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -33,11 +32,7 @@ export const MultiImageUploader = ({
     if (files.length === 0) return;
 
     if (currentImages.length + files.length > maxImages) {
-      toast({
-        title: "تجاوز الحد الأقصى",
-        description: `يمكنك رفع ${maxImages} صور كحد أقصى`,
-        variant: "destructive",
-      });
+      toast.error(`يمكنك رفع ${maxImages} صور كحد أقصى`);
       return;
     }
 
@@ -70,17 +65,9 @@ export const MultiImageUploader = ({
 
       const uploadedPaths = await Promise.all(uploadPromises);
       onImagesChange([...currentImages, ...uploadedPaths]);
-
-      toast({
-        title: "تم الرفع بنجاح",
-        description: `تم رفع ${uploadedPaths.length} صورة`,
-      });
+      toast.success(`تم رفع ${uploadedPaths.length} صورة`);
     } catch (error: any) {
-      toast({
-        title: "خطأ في الرفع",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في الرفع");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -93,22 +80,13 @@ export const MultiImageUploader = ({
 
     try {
       const { error } = await supabase.storage.from(bucket).remove([imagePath]);
-
       if (error) throw error;
 
       const newImages = currentImages.filter((_, i) => i !== index);
       onImagesChange(newImages);
-
-      toast({
-        title: "تم الحذف",
-        description: "تم حذف الصورة بنجاح",
-      });
+      toast.success("تم حذف الصورة بنجاح");
     } catch (error: any) {
-      toast({
-        title: "خطأ في الحذف",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "خطأ في الحذف");
     } finally {
       setDeletingIndex(null);
     }
