@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,7 +32,6 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 
 const Profile = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
@@ -87,17 +86,10 @@ const Profile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
-      toast({
-        title: 'تم التحديث بنجاح',
-        description: 'تم تحديث معلومات الملف الشخصي',
-      });
+      toast.success('تم تحديث معلومات الملف الشخصي');
     },
     onError: (error: Error) => {
-      toast({
-        title: 'فشل التحديث',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'فشل التحديث');
     },
   });
 
@@ -120,17 +112,10 @@ const Profile = () => {
     },
     onSuccess: () => {
       passwordForm.reset();
-      toast({
-        title: 'تم التحديث بنجاح',
-        description: 'تم تغيير كلمة المرور',
-      });
+      toast.success('تم تغيير كلمة المرور');
     },
     onError: (error: Error) => {
-      toast({
-        title: 'فشل التحديث',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'فشل التحديث');
     },
   });
 

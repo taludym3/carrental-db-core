@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Plus, Eye, Pencil, Trash2, Search } from 'lucide-react';
 import {
   AlertDialog,
@@ -102,26 +102,14 @@ const ModelsList = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['car-models'] });
-      toast({
-        title: 'تم الحذف بنجاح',
-        description: 'تم حذف الموديل بنجاح',
-      });
+      toast.success('تم حذف الموديل بنجاح');
       setDeleteModelId(null);
     },
     onError: (error: any) => {
-      let errorMessage = 'حدث خطأ أثناء الحذف';
-      
-      // Check for foreign key constraint errors
-      if (error.message?.includes('foreign key constraint') || 
-          error.code === '23503') {
-        errorMessage = 'لا يمكن حذف هذا الموديل لأنه مرتبط بسيارات موجودة في النظام';
-      }
-      
-      toast({
-        title: 'فشل الحذف',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      const errorMessage = error.message?.includes('foreign key constraint') || error.code === '23503'
+        ? 'لا يمكن حذف هذا الموديل لأنه مرتبط بسيارات موجودة في النظام'
+        : 'حدث خطأ أثناء الحذف';
+      toast.error(errorMessage);
     },
   });
 

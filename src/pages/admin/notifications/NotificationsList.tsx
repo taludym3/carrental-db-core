@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Check, CheckCheck, Trash2, Bell, Search, Filter, Send, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NotificationCard } from './components/NotificationCard';
 import { Link } from 'react-router-dom';
@@ -95,10 +95,7 @@ export default function NotificationsList() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({
-        title: 'تم بنجاح',
-        description: 'تم تعليم جميع الإشعارات كمقروءة',
-      });
+      toast.success('تم تعليم جميع الإشعارات كمقروءة');
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-count'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-dropdown'] });
@@ -115,10 +112,7 @@ export default function NotificationsList() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({
-        title: 'تم الحذف',
-        description: 'تم حذف الإشعار بنجاح',
-      });
+      toast.success('تم حذف الإشعار بنجاح');
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-count'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-dropdown'] });

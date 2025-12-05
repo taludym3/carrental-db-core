@@ -14,7 +14,7 @@ import { ChangeDocumentStatusDialog } from './components/ChangeDocumentStatusDia
 import { DocumentPreview } from './components/DocumentPreview';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const DocumentDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -266,12 +266,7 @@ const DocumentDetails = () => {
                   if (error) throw error;
                   if (data) window.open(data.signedUrl, '_blank');
                 } catch (err) {
-                  console.error('Error opening document:', err);
-                  toast({
-                    title: 'خطأ',
-                    description: 'فشل فتح المستند',
-                    variant: 'destructive',
-                  });
+                  toast.error('فشل فتح المستند');
                 }
               }}
             >
@@ -296,12 +291,7 @@ const DocumentDetails = () => {
                     URL.revokeObjectURL(url);
                   }
                 } catch (err) {
-                  console.error('Error downloading document:', err);
-                  toast({
-                    title: 'خطأ',
-                    description: 'فشل تحميل المستند',
-                    variant: 'destructive',
-                  });
+                  toast.error('فشل تحميل المستند');
                 }
               }}
             >

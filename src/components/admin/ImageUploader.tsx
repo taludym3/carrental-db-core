@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface ImageUploaderProps {
   currentImageUrl?: string | null;
@@ -27,42 +27,29 @@ export const ImageUploader = ({
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: 'خطأ',
-        description: 'يرجى اختيار صورة فقط',
-        variant: 'destructive',
-      });
+      toast.error('يرجى اختيار صورة فقط');
       return;
     }
 
-    // Validate file size
     const fileSizeMB = file.size / (1024 * 1024);
     if (fileSizeMB > maxSizeMB) {
-      toast({
-        title: 'خطأ',
-        description: `حجم الصورة يجب أن يكون أقل من ${maxSizeMB} ميجابايت`,
-        variant: 'destructive',
-      });
+      toast.error(`حجم الصورة يجب أن يكون أقل من ${maxSizeMB} ميجابايت`);
       return;
     }
 
     setUploading(true);
 
     try {
-      // Create unique file name
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = folder ? `${folder}/${fileName}` : fileName;
 
-      // Delete old image if exists
       if (currentImageUrl) {
         const oldPath = currentImageUrl.split(`${bucket}/`)[1];
         if (oldPath) {
@@ -70,32 +57,21 @@ export const ImageUploader = ({
         }
       }
 
-      // Upload new image
       const { error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
 
       setPreview(publicUrl);
       onImageUploaded(publicUrl);
-
-      toast({
-        title: 'تم الرفع بنجاح',
-        description: 'تم رفع الصورة بنجاح',
-      });
+      toast.success('تم رفع الصورة بنجاح');
     } catch (error: any) {
-      console.error('Error uploading image:', error);
-      toast({
-        title: 'خطأ في الرفع',
-        description: error.message || 'حدث خطأ أثناء رفع الصورة',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'حدث خطأ أثناء رفع الصورة');
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -119,18 +95,9 @@ export const ImageUploader = ({
 
       setPreview(null);
       onImageDeleted?.();
-
-      toast({
-        title: 'تم الحذف',
-        description: 'تم حذف الصورة بنجاح',
-      });
+      toast.success('تم حذف الصورة بنجاح');
     } catch (error: any) {
-      console.error('Error deleting image:', error);
-      toast({
-        title: 'خطأ في الحذف',
-        description: error.message || 'حدث خطأ أثناء حذف الصورة',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'حدث خطأ أثناء حذف الصورة');
     } finally {
       setDeleting(false);
     }

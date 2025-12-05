@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ImageUploader } from '@/components/admin/ImageUploader';
@@ -83,18 +83,10 @@ const BrandEdit = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'تم التحديث بنجاح',
-        description: 'تم تحديث العلامة التجارية بنجاح',
-      });
-
+      toast.success('تم تحديث العلامة التجارية بنجاح');
       navigate('/admin/brands');
     } catch (error: any) {
-      toast({
-        title: 'خطأ في التحديث',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'خطأ في التحديث');
     }
   };
 

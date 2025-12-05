@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { SpecificationsInput } from '@/components/admin/SpecificationsInput';
@@ -163,18 +163,11 @@ const ModelEdit = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['car-models'] });
       queryClient.invalidateQueries({ queryKey: ['car-model', id] });
-      toast({
-        title: 'تم التحديث بنجاح',
-        description: 'تم تحديث الموديل بنجاح',
-      });
+      toast.success('تم تحديث الموديل بنجاح');
       navigate(`/admin/models/${id}`);
     },
     onError: (error: Error) => {
-      toast({
-        title: 'فشل التحديث',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'فشل التحديث');
     },
   });
 

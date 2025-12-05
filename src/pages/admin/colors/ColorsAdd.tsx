@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -18,7 +18,6 @@ interface ColorFormData {
 
 const ColorsAdd = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm<ColorFormData>({
     defaultValues: {
       is_active: true,
@@ -34,18 +33,10 @@ const ColorsAdd = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'تم الإضافة بنجاح',
-        description: 'تم إضافة اللون الجديد بنجاح',
-      });
-
+      toast.success('تم إضافة اللون الجديد بنجاح');
       navigate('/admin/colors');
     } catch (error: any) {
-      toast({
-        title: 'خطأ في الإضافة',
-        description: error.message || 'حدث خطأ أثناء إضافة اللون',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'حدث خطأ أثناء إضافة اللون');
     }
   };
 

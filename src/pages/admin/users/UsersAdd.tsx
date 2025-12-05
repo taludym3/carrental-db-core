@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 const userSchema = z.object({
@@ -86,18 +86,11 @@ export default function UsersAdd() {
       return response.data.user;
     },
     onSuccess: () => {
-      toast({
-        title: 'تم إضافة المستخدم بنجاح',
-        description: 'تم إنشاء حساب المستخدم الجديد',
-      });
+      toast.success('تم إنشاء حساب المستخدم الجديد');
       navigate('/admin/users');
     },
     onError: (error: any) => {
-      toast({
-        title: 'حدث خطأ',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'حدث خطأ');
     },
   });
 

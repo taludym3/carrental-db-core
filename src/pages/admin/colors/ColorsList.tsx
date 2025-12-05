@@ -7,6 +7,7 @@ import { Plus, Edit, Trash2, Eye, Palette } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ColorCard } from './components/ColorCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -25,12 +26,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 
 const ColorsList = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -47,7 +46,6 @@ const ColorsList = () => {
     },
   });
 
-  // جلب عدد السيارات المرتبطة باللون المراد حذفه
   const { data: relatedCars } = useQuery({
     queryKey: ['color-cars', deleteId],
     queryFn: async () => {
@@ -68,7 +66,6 @@ const ColorsList = () => {
     if (!deleteId) return;
 
     try {
-      // حذف اللون (السيارات المرتبطة سيتم تعيين color_id لها إلى NULL تلقائياً)
       const { error } = await supabase
         .from('car_colors')
         .delete()
@@ -76,22 +73,15 @@ const ColorsList = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'تم الحذف بنجاح',
-        description: relatedCars && relatedCars.length > 0
+      toast.success(
+        relatedCars && relatedCars.length > 0
           ? `تم حذف اللون بنجاح. تم إزالة اللون من ${relatedCars.length} سيارة`
-          : 'تم حذف اللون بنجاح',
-      });
+          : 'تم حذف اللون بنجاح'
+      );
 
       refetch();
     } catch (error: any) {
-      console.error('Delete error:', error);
-      
-      toast({
-        title: 'خطأ في الحذف',
-        description: error.message || 'حدث خطأ أثناء الحذف',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'حدث خطأ أثناء الحذف');
     } finally {
       setDeleteId(null);
     }
