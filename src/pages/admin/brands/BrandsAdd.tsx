@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 
@@ -47,18 +47,10 @@ const BrandsAdd = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'تمت الإضافة بنجاح',
-        description: 'تم إضافة العلامة التجارية بنجاح',
-      });
-
+      toast.success('تم إضافة العلامة التجارية بنجاح');
       navigate('/admin/brands');
     } catch (error: any) {
-      toast({
-        title: 'خطأ في الإضافة',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'خطأ في الإضافة');
     }
   };
 

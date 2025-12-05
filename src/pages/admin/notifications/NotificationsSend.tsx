@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowRight, Send, Eye } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { PageHeader } from '@/components/admin/PageHeader';
 import {
   Dialog,
@@ -105,19 +105,12 @@ export default function NotificationsSend() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({
-        title: 'تم الإرسال بنجاح',
-        description: `تم إرسال الإشعار بنجاح`,
-      });
+      toast.success('تم إرسال الإشعار بنجاح');
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       navigate('/admin/notifications');
     },
     onError: (error: any) => {
-      toast({
-        title: 'خطأ',
-        description: error.message || 'فشل إرسال الإشعار',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'فشل إرسال الإشعار');
     },
   });
 
@@ -125,11 +118,7 @@ export default function NotificationsSend() {
     e.preventDefault();
 
     if (!titleAr || !messageAr) {
-      toast({
-        title: 'خطأ',
-        description: 'يرجى إدخال العنوان والرسالة بالعربية على الأقل',
-        variant: 'destructive',
-      });
+      toast.error('يرجى إدخال العنوان والرسالة بالعربية على الأقل');
       return;
     }
 

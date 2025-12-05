@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export const NotificationsDropdown = () => {
   const { user } = useAuth();
@@ -69,11 +69,7 @@ export const NotificationsDropdown = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
     onError: () => {
-      toast({
-        title: 'حدث خطأ',
-        description: 'فشل تحديث الإشعار',
-        variant: 'destructive',
-      });
+      toast.error('فشل تحديث الإشعار');
     },
   });
 

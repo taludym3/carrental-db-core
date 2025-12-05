@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight, Pencil, Trash2, Gauge, Settings, Fuel, Zap, Cog } from 'lucide-react';
 import {
   AlertDialog,
@@ -76,18 +76,11 @@ const ModelDetails = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['car-models'] });
-      toast({
-        title: 'تم الحذف بنجاح',
-        description: 'تم حذف الموديل بنجاح',
-      });
+      toast.success('تم حذف الموديل بنجاح');
       navigate('/admin/models');
     },
     onError: (error) => {
-      toast({
-        title: 'فشل الحذف',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'فشل الحذف');
     },
   });
 

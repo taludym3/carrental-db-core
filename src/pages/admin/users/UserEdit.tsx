@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 const userSchema = z.object({
@@ -119,18 +119,11 @@ export default function UserEdit() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-details', id] });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast({
-        title: 'تم التحديث بنجاح',
-        description: 'تم تحديث بيانات المستخدم',
-      });
+      toast.success('تم تحديث بيانات المستخدم');
       navigate(`/admin/users/${id}`);
     },
     onError: (error: any) => {
-      toast({
-        title: 'حدث خطأ',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'حدث خطأ');
     },
   });
 

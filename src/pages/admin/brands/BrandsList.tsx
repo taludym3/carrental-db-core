@@ -9,7 +9,7 @@ import { Plus, Search, Eye, Pencil, Trash2, Tag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BrandCard } from './components/BrandCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -47,7 +47,6 @@ const BrandsList = () => {
     },
   });
 
-  // جلب الموديلات المرتبطة بالبراند المراد حذفه
   const { data: relatedModels } = useQuery({
     queryKey: ['brand-models', deleteId],
     queryFn: async () => {
@@ -68,11 +67,9 @@ const BrandsList = () => {
     if (!deleteId) return;
 
     try {
-      // الخطوة 1: حذف جميع الموديلات المرتبطة أولاً
       if (relatedModels && relatedModels.length > 0) {
         const modelIds = relatedModels.map(m => m.id);
         
-        // حذف الموديلات (سيؤدي هذا إلى حذف السيارات CASCADE تلقائياً)
         const { error: modelsError } = await supabase
           .from('car_models')
           .delete()
@@ -81,7 +78,6 @@ const BrandsList = () => {
         if (modelsError) throw modelsError;
       }
       
-      // الخطوة 2: حذف البراند
       const { error: brandError } = await supabase
         .from('car_brands')
         .delete()
@@ -89,24 +85,15 @@ const BrandsList = () => {
 
       if (brandError) throw brandError;
 
-      toast({
-        title: 'تم الحذف بنجاح',
-        description: relatedModels && relatedModels.length > 0
+      toast.success(
+        relatedModels && relatedModels.length > 0
           ? `تم حذف العلامة التجارية و ${relatedModels.length} موديل مرتبط بنجاح`
-          : 'تم حذف العلامة التجارية بنجاح',
-      });
+          : 'تم حذف العلامة التجارية بنجاح'
+      );
 
       refetch();
     } catch (error: any) {
-      let errorMessage = 'حدث خطأ أثناء الحذف';
-      
-      console.error('Delete error:', error);
-      
-      toast({
-        title: 'خطأ في الحذف',
-        description: error.message || errorMessage,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'حدث خطأ أثناء الحذف');
     } finally {
       setDeleteId(null);
     }

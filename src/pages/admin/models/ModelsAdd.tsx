@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { SpecificationsInput } from '@/components/admin/SpecificationsInput';
@@ -110,18 +110,11 @@ const ModelsAdd = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({
-        title: 'تم الإضافة بنجاح',
-        description: 'تم إضافة الموديل بنجاح',
-      });
+      toast.success('تم إضافة الموديل بنجاح');
       navigate('/admin/models');
     },
     onError: (error: Error) => {
-      toast({
-        title: 'فشل الإضافة',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'فشل الإضافة');
     },
   });
 
