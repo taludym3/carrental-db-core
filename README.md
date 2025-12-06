@@ -1,28 +1,27 @@
-# LEAGO - Car Rental Management System
+# ByteTransform
 
-A comprehensive, full-featured car rental management and booking platform built with React, TypeScript, and Supabase. Designed for managing multi-branch car rental operations with complete booking, payment processing, and inventory management capabilities.
+A comprehensive dashboard application for managing trainers and trainees. Built with React, TypeScript, and Supabase, providing a complete management system for training programs, bookings, payments, and user management.
 
 ## Features
 
 ### Admin Dashboard
-- **User Management** - Create, update, and manage users with role-based access control
-- **Car Inventory** - Full CRUD operations for cars, brands, models, and colors
-- **Branch Management** - Multi-branch support with geolocation and working hours
-- **Booking Management** - View, approve, and manage all bookings system-wide
+- **User Management** - Manage trainers, trainees, and admin accounts with role-based access
+- **Booking Management** - View, approve, and manage all training session bookings
+- **Branch Management** - Multi-branch support with location tracking and working hours
 - **Payment Tracking** - Monitor payments with Moyasar payment gateway integration
-- **Document Verification** - Review and approve customer documents (ID, driving license)
+- **Document Verification** - Review and approve user documents (ID, certifications)
 - **Announcements** - Create global or branch-specific announcements
+- **Notifications** - Send notifications to users
 - **Analytics & Reports** - Dashboard with key metrics and data visualization
 
 ### Branch Manager Dashboard
-- **Branch Cars** - Manage cars assigned to the branch
-- **Branch Bookings** - Handle bookings for the specific branch
-- **Staff Management** - Manage branch employees and roles
-- **Branch Reports** - View branch-specific analytics
-- **Notifications** - Send and receive branch notifications
+- **Staff Management** - Manage trainers and employees
+- **Bookings** - Handle training session bookings
+- **Reports** - View branch-specific analytics
+- **Settings** - Configure branch preferences
 
 ### Authentication & Security
-- Role-based access control (Admin, Branch Manager, Branch Employee, Customer)
+- Role-based access control (Admin, Branch Manager, Employee, Customer)
 - Protected routes with role verification
 - Secure session management with JWT tokens
 - Row-level security (RLS) policies on database
@@ -62,7 +61,7 @@ A comprehensive, full-featured car rental management and booking platform built 
 ## Project Structure
 
 ```
-carrental-db-core/
+bytransform/
 ├── src/
 │   ├── components/          # Reusable UI components
 │   │   ├── admin/           # Admin-specific components
@@ -82,9 +81,6 @@ carrental-db-core/
 │   └── main.tsx             # Entry point
 ├── supabase/
 │   ├── functions/           # Edge Functions
-│   │   ├── create-payment/  # Payment creation
-│   │   ├── check-payment-status/
-│   │   └── create-user/     # User creation
 │   └── migrations/          # Database migrations
 ├── public/                  # Static assets
 └── index.html               # HTML entry point
@@ -103,14 +99,12 @@ carrental-db-core/
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd carrental-db-core
+   cd bytransform
    ```
 
 2. **Install dependencies**
    ```bash
    npm install
-   # or
-   bun install
    ```
 
 3. **Configure environment variables**
@@ -147,73 +141,21 @@ carrental-db-core/
 |-------|-------------|
 | `profiles` | User profiles with roles and branch assignments |
 | `user_roles` | Role assignments and permissions |
-| `branches` | Rental branch locations and configuration |
-| `cars` | Car inventory with specifications |
-| `car_brands` | Car manufacturers |
-| `car_models` | Car models |
-| `car_colors` | Available colors |
-| `bookings` | Rental booking records |
+| `branches` | Branch locations and configuration |
+| `bookings` | Training session bookings |
 | `payments` | Payment transactions |
-| `documents` | Customer verification documents |
+| `documents` | User verification documents |
 | `notifications` | System notifications |
 | `announcements` | Global/branch announcements |
-| `audit_log` | Activity tracking |
 
-### Enums
-
-```sql
--- User roles
-user_role: 'admin', 'branch', 'branch_employee', 'customer'
-
--- Booking status
-booking_status: 'pending', 'confirmed', 'payment_pending', 'active', 'completed', 'cancelled', 'expired'
-
--- Car status
-car_status: 'available', 'rented', 'maintenance', 'hidden'
-
--- Document status
-document_status: 'pending', 'approved', 'rejected'
-```
-
-## API Routes
-
-### Frontend Routes
-
-**Public**
-- `/login` - User login
-- `/register` - User registration
-
-**Admin** (requires `admin` role)
-- `/admin` - Dashboard home
-- `/admin/users` - User management
-- `/admin/cars` - Car inventory
-- `/admin/bookings` - All bookings
-- `/admin/branches` - Branch management
-- `/admin/payments` - Payment tracking
-- `/admin/reports` - Analytics
-
-**Branch** (requires `branch` or `branch_employee` role)
-- `/branch` - Branch dashboard
-- `/branch/cars` - Branch cars
-- `/branch/bookings` - Branch bookings
-- `/branch/staff` - Staff management
-
-### Edge Functions
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/functions/v1/create-payment` | POST | Create payment with Moyasar |
-| `/functions/v1/check-payment-status` | POST | Check payment status |
-| `/functions/v1/create-user` | POST | Create new user (admin) |
-
-## Role-Based Access Control
+### User Roles
 
 | Role | Access Level |
 |------|--------------|
-| `admin` | Full system access, manage all entities |
-| `branch` | Branch manager, manage single branch |
-| `branch_employee` | Limited access, handle bookings |
-| `customer` | Customer portal, view bookings |
+| `admin` | Full system access |
+| `branch` | Branch manager access |
+| `branch_employee` | Limited branch access |
+| `customer` | Trainee access |
 
 ## Environment Variables
 
@@ -223,16 +165,12 @@ document_status: 'pending', 'approved', 'rejected'
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key | Yes |
 | `VITE_SUPABASE_PROJECT_ID` | Supabase project ID | Yes |
 
-For Edge Functions (configured in Supabase dashboard):
-- `MOYASAR_SECRET_KEY` - Moyasar API secret key
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
-
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
 5. Open a Pull Request
 
 ## License
