@@ -102,7 +102,6 @@ const AnnouncementEdit = () => {
           if (currentImageUrl) {
             const oldImagePath = currentImageUrl.split('/').pop();
             if (oldImagePath) {
-              console.log('Deleting old image:', oldImagePath);
               await supabase.storage
                 .from('announcement-images')
                 .remove([oldImagePath]);
@@ -115,8 +114,6 @@ const AnnouncementEdit = () => {
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
           const filePath = `${fileName}`;
 
-          console.log('Uploading new image:', filePath);
-
           const { error: uploadError, data: uploadData } = await supabase.storage
             .from('announcement-images')
             .upload(filePath, imageFile, {
@@ -125,11 +122,9 @@ const AnnouncementEdit = () => {
             });
 
           if (uploadError) {
-            console.error('Image upload error:', uploadError);
             throw new Error(`فشل رفع الصورة: ${uploadError.message}`);
           }
 
-          console.log('Image uploaded successfully:', uploadData);
           setUploadProgress(60);
 
           const { data: { publicUrl } } = supabase.storage
@@ -137,14 +132,8 @@ const AnnouncementEdit = () => {
             .getPublicUrl(filePath);
 
           imageUrl = publicUrl;
-          console.log('New public URL:', publicUrl);
           setUploadProgress(80);
         }
-
-        console.log('Updating announcement with data:', {
-          ...formData,
-          image_url: imageUrl
-        });
 
         const { data, error } = await supabase
           .from('announcements')
@@ -165,15 +154,12 @@ const AnnouncementEdit = () => {
           .single();
 
         if (error) {
-          console.error('Database update error:', error);
           throw new Error(`فشل تحديث الإعلان: ${error.message}`);
         }
 
-        console.log('Announcement updated successfully:', data);
         setUploadProgress(100);
         return data;
       } catch (error: any) {
-        console.error('Update announcement error:', error);
         setUploadProgress(0);
         throw error;
       }

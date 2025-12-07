@@ -13,8 +13,7 @@ interface BranchReportsHeaderProps {
 
 export function BranchReportsHeader({ dateRange, onDateRangeChange }: BranchReportsHeaderProps) {
   const handleExport = () => {
-    // Export functionality placeholder
-    console.log('تصدير التقرير...');
+    // Export functionality placeholder - to be implemented
   };
 
   return (
