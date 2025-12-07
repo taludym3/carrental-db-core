@@ -67,8 +67,6 @@ const AnnouncementsAdd = () => {
           const fileExt = imageFile.name.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
           const filePath = `${fileName}`;
-
-          console.log('Uploading image to announcement-images bucket:', filePath);
           setUploadProgress(30);
 
           const { error: uploadError, data: uploadData } = await supabase.storage
@@ -79,11 +77,9 @@ const AnnouncementsAdd = () => {
             });
 
           if (uploadError) {
-            console.error('Image upload error:', uploadError);
             throw new Error(`فشل رفع الصورة: ${uploadError.message}`);
           }
 
-          console.log('Image uploaded successfully:', uploadData);
           setUploadProgress(60);
 
           const { data: { publicUrl } } = supabase.storage
@@ -91,15 +87,8 @@ const AnnouncementsAdd = () => {
             .getPublicUrl(filePath);
 
           imageUrl = publicUrl;
-          console.log('Public URL generated:', publicUrl);
           setUploadProgress(80);
         }
-
-        console.log('Creating announcement with data:', {
-          ...formData,
-          image_url: imageUrl,
-          created_by: user?.id
-        });
 
         const { data, error } = await supabase
           .from('announcements')
@@ -120,15 +109,12 @@ const AnnouncementsAdd = () => {
           .single();
 
         if (error) {
-          console.error('Database insert error:', error);
           throw new Error(`فشل إنشاء الإعلان: ${error.message}`);
         }
 
-        console.log('Announcement created successfully:', data);
         setUploadProgress(100);
         return data;
       } catch (error: any) {
-        console.error('Create announcement error:', error);
         setUploadProgress(0);
         throw error;
       }
