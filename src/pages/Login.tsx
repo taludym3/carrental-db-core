@@ -185,16 +185,8 @@ const Login = () => {
             </form>
           </Form>
 
-          <div className="mt-6 space-y-3">
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">ليس لديك حساب؟ </span>
-              <Link to="/register" className="text-primary font-semibold hover:underline">
-                إنشاء حساب جديد
-              </Link>
-            </div>
-            <div className="text-center text-sm text-muted-foreground">
-              <p>نسيت كلمة المرور؟ تواصل مع المسؤول</p>
-            </div>
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p>نسيت كلمة المرور؟ تواصل مع المسؤول</p>
           </div>
         </CardContent>
       </Card>
