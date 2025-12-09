@@ -1,6 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Button } from '@/components/ui/button';
+import { MapPin, Crosshair, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BranchLocationMapProps {
   latitude?: number;
@@ -26,6 +29,12 @@ export function BranchLocationMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [currentCoords, setCurrentCoords] = useState({ lat: latitude, lng: longitude });
+
+  useEffect(() => {
+    setCurrentCoords({ lat: latitude, lng: longitude });
+  }, [latitude, longitude]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -47,6 +56,7 @@ export function BranchLocationMap({
       if (!readonly && onLocationChange) {
         map.on('click', (e: L.LeafletMouseEvent) => {
           marker.setLatLng(e.latlng);
+          setCurrentCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
           onLocationChange(e.latlng.lat, e.latlng.lng);
         });
       }
@@ -55,6 +65,7 @@ export function BranchLocationMap({
       if (!readonly && onLocationChange) {
         marker.on('dragend', () => {
           const pos = marker.getLatLng();
+          setCurrentCoords({ lat: pos.lat, lng: pos.lng });
           onLocationChange(pos.lat, pos.lng);
         });
       }
@@ -82,18 +93,101 @@ export function BranchLocationMap({
     }
   }, [latitude, longitude]);
 
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('المتصفح لا يدعم تحديد الموقع');
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude: lat, longitude: lng } = position.coords;
+        setCurrentCoords({ lat, lng });
+        
+        if (mapInstanceRef.current && markerRef.current) {
+          const newLatLng = L.latLng(lat, lng);
+          mapInstanceRef.current.flyTo(newLatLng, 15);
+          markerRef.current.setLatLng(newLatLng);
+        }
+        
+        if (onLocationChange) {
+          onLocationChange(lat, lng);
+        }
+        
+        toast.success('تم تحديد موقعك بنجاح');
+        setIsLocating(false);
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        toast.error('فشل في تحديد الموقع. تأكد من تفعيل خدمات الموقع');
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleCopyCoordinates = () => {
+    const coordsText = `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}`;
+    navigator.clipboard.writeText(coordsText);
+    toast.success('تم نسخ الإحداثيات');
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* Instructions */}
+      {!readonly && (
+        <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <MapPin className="h-5 w-5 text-primary shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            <strong className="text-foreground">انقر على الخريطة</strong> لتحديد موقع الفرع، أو <strong className="text-foreground">اسحب العلامة</strong> لضبط الموقع بدقة
+          </p>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      {!readonly && (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleGetCurrentLocation}
+            disabled={isLocating}
+          >
+            <Crosshair className="ml-2 h-4 w-4" />
+            {isLocating ? 'جاري التحديد...' : 'استخدام موقعي الحالي'}
+          </Button>
+        </div>
+      )}
+
+      {/* Map Container */}
       <div 
         ref={mapRef} 
-        className="w-full h-96 rounded-lg border overflow-hidden"
+        className="w-full h-80 rounded-lg border overflow-hidden"
       />
 
-      {!readonly && (
-        <p className="text-sm text-muted-foreground">
-          💡 انقر على الخريطة أو اسحب العلامة لتحديد الموقع
-        </p>
-      )}
+      {/* Coordinates Display */}
+      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            <span className="text-muted-foreground">الإحداثيات:</span>{' '}
+            <code className="bg-background px-2 py-0.5 rounded text-xs">
+              {currentCoords.lat.toFixed(6)}, {currentCoords.lng.toFixed(6)}
+            </code>
+          </span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleCopyCoordinates}
+          className="h-7"
+        >
+          <Copy className="h-3 w-3" />
+        </Button>
+      </div>
     </div>
   );
 }
