@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,18 +7,43 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/admin/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MultiImageUploader } from '@/components/admin/MultiImageUploader';
 import { BranchLocationMap } from '@/pages/admin/branches/components/BranchLocationMap';
 import { WorkingHoursSelector } from '@/components/admin/WorkingHoursSelector';
 import { SaudiCitiesSelector } from '@/components/admin/SaudiCitiesSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Save } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  AlertCircle,
+  Save,
+  Building2,
+  Clock,
+  MapPin,
+  FileText,
+  Circle,
+} from 'lucide-react';
 
 const branchSettingsSchema = z.object({
   name_en: z.string().min(1, 'الاسم بالإنجليزية مطلوب'),
@@ -46,17 +71,33 @@ export default function BranchSettings() {
   const [isManager, setIsManager] = useState(false);
   const [latitude, setLatitude] = useState<number>(24.7136);
   const [longitude, setLongitude] = useState<number>(46.6753);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [initialValues, setInitialValues] = useState<BranchSettingsFormData | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setValue,
-    watch,
-  } = useForm<BranchSettingsFormData>({
+  const form = useForm<BranchSettingsFormData>({
     resolver: zodResolver(branchSettingsSchema),
+    defaultValues: {
+      name_en: '',
+      name_ar: '',
+      location_en: '',
+      location_ar: '',
+      description_en: '',
+      description_ar: '',
+      email: '',
+      phone: '',
+      working_hours: '',
+      latitude: null,
+      longitude: null,
+    },
   });
+
+  const currentValues = form.watch();
+
+  // Check if form has unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    if (!initialValues) return false;
+    return JSON.stringify(currentValues) !== JSON.stringify(initialValues);
+  }, [currentValues, initialValues]);
 
   useEffect(() => {
     loadBranchData();
@@ -66,7 +107,6 @@ export default function BranchSettings() {
     if (!user) return;
 
     try {
-      // التحقق من أن المستخدم مدير فرع
       const { data: roleData } = await supabase
         .from('user_roles')
         .select('role')
@@ -81,7 +121,6 @@ export default function BranchSettings() {
 
       setIsManager(true);
 
-      // جلب branch_id من الملف الشخصي
       const { data: profileData } = await supabase
         .from('profiles')
         .select('branch_id')
@@ -96,7 +135,6 @@ export default function BranchSettings() {
 
       setBranchId(profileData.branch_id);
 
-      // جلب بيانات الفرع
       const { data: branchData, error } = await supabase
         .from('branches')
         .select('*')
@@ -108,8 +146,8 @@ export default function BranchSettings() {
       if (branchData) {
         setLatitude(branchData.latitude || 24.7136);
         setLongitude(branchData.longitude || 46.6753);
-        
-        reset({
+
+        const formValues: BranchSettingsFormData = {
           name_en: branchData.name_en,
           name_ar: branchData.name_ar || '',
           location_en: branchData.location_en,
@@ -121,8 +159,10 @@ export default function BranchSettings() {
           working_hours: branchData.working_hours || '',
           latitude: branchData.latitude,
           longitude: branchData.longitude,
-        });
+        };
 
+        form.reset(formValues);
+        setInitialValues(formValues);
         setImages(branchData.images || []);
       }
     } catch (error: any) {
@@ -136,8 +176,8 @@ export default function BranchSettings() {
   const handleLocationChange = (lat: number, lng: number) => {
     setLatitude(lat);
     setLongitude(lng);
-    setValue('latitude', lat);
-    setValue('longitude', lng);
+    form.setValue('latitude', lat);
+    form.setValue('longitude', lng);
   };
 
   const onSubmit = async (data: BranchSettingsFormData) => {
@@ -167,6 +207,7 @@ export default function BranchSettings() {
 
       if (error) throw error;
 
+      setInitialValues(data);
       toast.success('تم حفظ التغييرات بنجاح');
     } catch (error: any) {
       console.error('Error saving branch settings:', error);
@@ -176,19 +217,33 @@ export default function BranchSettings() {
     }
   };
 
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowCancelDialog(true);
+    } else {
+      navigate('/branch');
+    }
+  };
+
+  const confirmCancel = () => {
+    setShowCancelDialog(false);
+    navigate('/branch');
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          title="إعدادات الفرع"
-          description="تعديل معلومات الفرع"
-        />
+        <PageHeader title="إعدادات الفرع" description="تعديل معلومات الفرع" />
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-12" />
-              ))}
+              <Skeleton className="h-10 w-full" />
+              <div className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="h-10" />
+                <Skeleton className="h-10" />
+              </div>
+              <Skeleton className="h-32" />
+              <Skeleton className="h-64" />
             </div>
           </CardContent>
         </Card>
@@ -199,186 +254,298 @@ export default function BranchSettings() {
   if (!isManager) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          title="إعدادات الفرع"
-          description="تعديل معلومات الفرع"
-        />
+        <PageHeader title="إعدادات الفرع" description="تعديل معلومات الفرع" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            هذه الصفحة متاحة فقط لمدراء الفروع
-          </AlertDescription>
+          <AlertDescription>هذه الصفحة متاحة فقط لمدراء الفروع</AlertDescription>
         </Alert>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="إعدادات الفرع"
-        description="تعديل معلومات الفرع"
-      />
+    <div className="space-y-6 pb-24">
+      <div className="flex items-center justify-between">
+        <PageHeader title="إعدادات الفرع" description="تعديل معلومات الفرع" />
+        
+        {/* Unsaved Changes Indicator */}
+        {hasUnsavedChanges && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm">
+            <Circle className="h-2 w-2 fill-current animate-pulse" />
+            <span>تغييرات غير محفوظة</span>
+          </div>
+        )}
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* المعلومات الأساسية */}
-        <Card>
-          <CardHeader>
-            <CardTitle>المعلومات الأساسية</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name_ar">اسم الفرع (عربي) *</Label>
-                <Input
-                  id="name_ar"
-                  {...register('name_ar')}
-                  placeholder="الفرع الرئيسي"
-                />
-                {errors.name_ar && (
-                  <p className="text-sm text-destructive">{errors.name_ar.message}</p>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Tabs defaultValue="basic" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="basic" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                <span className="hidden sm:inline">الأساسية</span>
+              </TabsTrigger>
+              <TabsTrigger value="hours" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                <span className="hidden sm:inline">ساعات العمل</span>
+              </TabsTrigger>
+              <TabsTrigger value="location" className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span className="hidden sm:inline">الموقع</span>
+              </TabsTrigger>
+              <TabsTrigger value="description" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">الوصف</span>
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Basic Information Tab */}
+            <TabsContent value="basic">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    المعلومات الأساسية
+                  </CardTitle>
+                  <CardDescription>
+                    معلومات الاتصال والبيانات الرئيسية للفرع
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="name_ar"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اسم الفرع (عربي) *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="الفرع الرئيسي" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="name_en"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اسم الفرع (إنجليزي) *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Main Branch" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>البريد الإلكتروني</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="branch@example.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>رقم الهاتف *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+966 50 123 4567" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Working Hours Tab */}
+            <TabsContent value="hours">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    ساعات العمل
+                  </CardTitle>
+                  <CardDescription>
+                    حدد أوقات عمل الفرع لكل يوم من أيام الأسبوع
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="working_hours"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <WorkingHoursSelector
+                            value={field.value || ''}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Location Tab */}
+            <TabsContent value="location">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    الموقع
+                  </CardTitle>
+                  <CardDescription>
+                    حدد عنوان وموقع الفرع على الخريطة
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <SaudiCitiesSelector
+                    locationAr={form.watch('location_ar') || ''}
+                    locationEn={form.watch('location_en') || ''}
+                    onLocationArChange={(value) => form.setValue('location_ar', value)}
+                    onLocationEnChange={(value) => form.setValue('location_en', value)}
+                  />
+
+                  <div className="space-y-2">
+                    <FormLabel>الموقع على الخريطة</FormLabel>
+                    <BranchLocationMap
+                      latitude={latitude}
+                      longitude={longitude}
+                      onLocationChange={handleLocationChange}
+                      readonly={false}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Description Tab */}
+            <TabsContent value="description">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    الوصف
+                  </CardTitle>
+                  <CardDescription>
+                    أضف وصفاً تفصيلياً للفرع (اختياري)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="description_ar"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الوصف (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            rows={4}
+                            placeholder="اكتب وصفاً للفرع بالعربية..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description_en"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الوصف (إنجليزي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            rows={4}
+                            placeholder="Write branch description in English..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          {/* Floating Save Button */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t shadow-lg z-50">
+            <div className="container max-w-4xl mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {hasUnsavedChanges ? (
+                  <>
+                    <Circle className="h-2 w-2 fill-warning text-warning animate-pulse" />
+                    <span>لديك تغييرات غير محفوظة</span>
+                  </>
+                ) : (
+                  <span>جميع التغييرات محفوظة</span>
                 )}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="name_en">اسم الفرع (إنجليزي) *</Label>
-                <Input
-                  id="name_en"
-                  {...register('name_en')}
-                  placeholder="Main Branch"
-                />
-                {errors.name_en && (
-                  <p className="text-sm text-destructive">{errors.name_en.message}</p>
-                )}
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={saving}
+                >
+                  إلغاء
+                </Button>
+                <Button type="submit" disabled={saving || !hasUnsavedChanges}>
+                  <Save className="ml-2 h-4 w-4" />
+                  {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                </Button>
               </div>
             </div>
+          </div>
+        </form>
+      </Form>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...register('email')}
-                  placeholder="branch@example.com"
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">رقم الهاتف *</Label>
-                <Input
-                  id="phone"
-                  {...register('phone')}
-                  placeholder="+966 50 123 4567"
-                />
-                {errors.phone && (
-                  <p className="text-sm text-destructive">{errors.phone.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>ساعات العمل</Label>
-              <WorkingHoursSelector
-                value={watch('working_hours') || ''}
-                onChange={(value) => setValue('working_hours', value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* الموقع */}
-        <Card>
-          <CardHeader>
-            <CardTitle>الموقع</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <SaudiCitiesSelector
-                locationAr={watch('location_ar') || ''}
-                locationEn={watch('location_en') || ''}
-                onLocationArChange={(value) => setValue('location_ar', value)}
-                onLocationEnChange={(value) => setValue('location_en', value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>الموقع على الخريطة</Label>
-              <BranchLocationMap
-                latitude={latitude}
-                longitude={longitude}
-                onLocationChange={handleLocationChange}
-                readonly={false}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* الوصف */}
-        <Card>
-          <CardHeader>
-            <CardTitle>الوصف</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="description_ar">الوصف (عربي)</Label>
-              <Textarea
-                id="description_ar"
-                {...register('description_ar')}
-                rows={4}
-                placeholder="اكتب وصفاً للفرع بالعربية..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description_en">الوصف (إنجليزي)</Label>
-              <Textarea
-                id="description_en"
-                {...register('description_en')}
-                rows={4}
-                placeholder="Write branch description in English..."
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* الصور - مخفية مؤقتاً، سيتم تفعيلها لاحقاً */}
-        {/* 
-        <Card>
-          <CardHeader>
-            <CardTitle>صور الفرع</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MultiImageUploader
-              currentImages={images}
-              onImagesChange={setImages}
-              bucket="branch-images"
-              folder="branch-images"
-              maxImages={10}
-            />
-          </CardContent>
-        </Card>
-        */}
-
-        {/* أزرار الحفظ */}
-        <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate('/branch')}
-            disabled={saving}
-          >
-            إلغاء
-          </Button>
-          <Button type="submit" disabled={saving}>
-            <Save className="ml-2 h-4 w-4" />
-            {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-          </Button>
-        </div>
-      </form>
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تجاهل التغييرات؟</AlertDialogTitle>
+            <AlertDialogDescription>
+              لديك تغييرات غير محفوظة. هل أنت متأكد من أنك تريد المغادرة بدون حفظ؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>متابعة التعديل</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              تجاهل التغييرات
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
