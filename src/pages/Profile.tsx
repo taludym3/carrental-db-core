@@ -5,36 +5,25 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, User, Lock } from 'lucide-react';
+import { Loader2, User, Mail, Phone } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const profileSchema = z.object({
   full_name: z.string().min(2, 'الاسم يجب أن يكون حرفين على الأقل').max(100),
-  phone: z.string().min(10, 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل').max(20),
-});
-
-const passwordSchema = z.object({
-  currentPassword: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-  newPassword: z.string().min(6, 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل'),
-  confirmPassword: z.string().min(6, 'تأكيد كلمة المرور يجب أن يكون 6 أحرف على الأقل'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'كلمتا المرور غير متطابقتين',
-  path: ['confirmPassword'],
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
-type PasswordFormData = z.infer<typeof passwordSchema>;
 
 const Profile = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -53,20 +42,10 @@ const Profile = () => {
     enabled: !!user?.id,
   });
 
-  const profileForm = useForm<ProfileFormData>({
+  const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     values: {
       full_name: profile?.full_name || '',
-      phone: profile?.phone || '',
-    },
-  });
-
-  const passwordForm = useForm<PasswordFormData>({
-    resolver: zodResolver(passwordSchema),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
     },
   });
 
@@ -78,7 +57,6 @@ const Profile = () => {
         .from('profiles')
         .update({
           full_name: data.full_name,
-          phone: data.phone,
         })
         .eq('user_id', user.id);
 
@@ -93,48 +71,42 @@ const Profile = () => {
     },
   });
 
-  const updatePasswordMutation = useMutation({
-    mutationFn: async (data: PasswordFormData) => {
-      // Verify current password by trying to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || '',
-        password: data.currentPassword,
-      });
-
-      if (signInError) throw new Error('كلمة المرور الحالية غير صحيحة');
-
-      // Update password
-      const { error } = await supabase.auth.updateUser({
-        password: data.newPassword,
-      });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      passwordForm.reset();
-      toast.success('تم تغيير كلمة المرور');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'فشل التحديث');
-    },
-  });
-
-  const onProfileSubmit = async (data: ProfileFormData) => {
+  const onSubmit = async (data: ProfileFormData) => {
     setIsUpdatingProfile(true);
     await updateProfileMutation.mutateAsync(data);
     setIsUpdatingProfile(false);
   };
 
-  const onPasswordSubmit = async (data: PasswordFormData) => {
-    setIsUpdatingPassword(true);
-    await updatePasswordMutation.mutateAsync(data);
-    setIsUpdatingPassword(false);
-  };
-
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="container mx-auto p-6 space-y-6">
+        <PageHeader
+          title="الملف الشخصي"
+          description="إدارة معلوماتك الشخصية"
+        />
+        <div className="max-w-lg mx-auto">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-60 mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -143,157 +115,96 @@ const Profile = () => {
     <div className="container mx-auto p-6 space-y-6">
       <PageHeader
         title="الملف الشخصي"
-        description="إدارة معلوماتك الشخصية وكلمة المرور"
+        description="إدارة معلوماتك الشخصية"
       />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile Information Card */}
+      <div className="max-w-lg mx-auto">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              المعلومات الشخصية
-            </CardTitle>
+          <CardHeader className="text-center pb-2">
+            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <User className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle>المعلومات الشخصية</CardTitle>
             <CardDescription>
-              تحديث الاسم ورقم الهاتف
+              يمكنك تعديل اسمك فقط
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profile?.email || user?.email || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  لا يمكن تغيير البريد الإلكتروني
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="full_name">الاسم الكامل</Label>
-                <Input
-                  id="full_name"
-                  {...profileForm.register('full_name')}
-                  placeholder="أدخل الاسم الكامل"
-                />
-                {profileForm.formState.errors.full_name && (
-                  <p className="text-sm text-destructive">
-                    {profileForm.formState.errors.full_name.message}
+          <CardContent className="pt-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Email - Read Only */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>البريد الإلكتروني</span>
+                  </div>
+                  <Input
+                    type="email"
+                    value={profile?.email || user?.email || ''}
+                    disabled
+                    className="bg-muted text-muted-foreground"
+                    dir="ltr"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    لا يمكن تغيير البريد الإلكتروني
                   </p>
-                )}
-              </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">رقم الهاتف</Label>
-                <Input
-                  id="phone"
-                  {...profileForm.register('phone')}
-                  placeholder="05xxxxxxxx"
-                  dir="ltr"
-                />
-                {profileForm.formState.errors.phone && (
-                  <p className="text-sm text-destructive">
-                    {profileForm.formState.errors.phone.message}
+                {/* Phone - Read Only */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>رقم الجوال</span>
+                  </div>
+                  <Input
+                    type="tel"
+                    value={profile?.phone || 'غير محدد'}
+                    disabled
+                    className="bg-muted text-muted-foreground"
+                    dir="ltr"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    لا يمكن تغيير رقم الجوال
                   </p>
-                )}
-              </div>
+                </div>
 
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isUpdatingProfile}
-              >
-                {isUpdatingProfile ? (
-                  <>
-                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                    جاري الحفظ...
-                  </>
-                ) : (
-                  'حفظ التغييرات'
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Change Password Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              تغيير كلمة المرور
-            </CardTitle>
-            <CardDescription>
-              تحديث كلمة المرور الخاصة بك
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">كلمة المرور الحالية</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  {...passwordForm.register('currentPassword')}
-                  placeholder="أدخل كلمة المرور الحالية"
+                {/* Full Name - Editable */}
+                <FormField
+                  control={form.control}
+                  name="full_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        الاسم الكامل
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="أدخل الاسم الكامل" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {passwordForm.formState.errors.currentPassword && (
-                  <p className="text-sm text-destructive">
-                    {passwordForm.formState.errors.currentPassword.message}
-                  </p>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">كلمة المرور الجديدة</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  {...passwordForm.register('newPassword')}
-                  placeholder="أدخل كلمة المرور الجديدة"
-                />
-                {passwordForm.formState.errors.newPassword && (
-                  <p className="text-sm text-destructive">
-                    {passwordForm.formState.errors.newPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  {...passwordForm.register('confirmPassword')}
-                  placeholder="أعد إدخال كلمة المرور الجديدة"
-                />
-                {passwordForm.formState.errors.confirmPassword && (
-                  <p className="text-sm text-destructive">
-                    {passwordForm.formState.errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isUpdatingPassword}
-              >
-                {isUpdatingPassword ? (
-                  <>
-                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                    جاري التحديث...
-                  </>
-                ) : (
-                  'تحديث كلمة المرور'
-                )}
-              </Button>
-            </form>
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isUpdatingProfile || !form.formState.isDirty}
+                >
+                  {isUpdatingProfile ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري الحفظ...
+                    </>
+                  ) : (
+                    'حفظ التغييرات'
+                  )}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>
