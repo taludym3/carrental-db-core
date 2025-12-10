@@ -30,6 +30,15 @@ const Login = () => {
   // توجيه المستخدم المسجل بالفعل إلى صفحته
   useEffect(() => {
     if (!authLoading && user && role) {
+      // منع العملاء من الدخول
+      if (role === 'customer') {
+        toast.error('تسجيل الدخول غير متاح للعملاء حالياً');
+        import('@/integrations/supabase/client').then(({ supabase }) => {
+          supabase.auth.signOut();
+        });
+        return;
+      }
+      
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
@@ -47,9 +56,9 @@ const Login = () => {
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     const { error } = await signIn(data.email, data.password);
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       toast.error('خطأ في تسجيل الدخول', {
         description: error.message === 'Invalid login credentials' 
           ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
@@ -59,44 +68,7 @@ const Login = () => {
     }
 
     toast.success('تم تسجيل الدخول بنجاح');
-
-    // انتظر تحميل الدور وتوجيه المستخدم
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      
-      if (!authUser) {
-        navigate('/login', { replace: true });
-        return;
-      }
-
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', authUser.id)
-        .maybeSingle();
-
-      const userRole = roleData?.role;
-
-      switch (userRole) {
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'branch':
-        case 'branch_employee':
-          navigate('/branch', { replace: true });
-          break;
-        case 'customer':
-          toast.error('تسجيل الدخول غير متاح للعملاء حالياً');
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
-        default:
-          navigate(from, { replace: true });
-      }
-    } catch (err) {
-      navigate(from, { replace: true });
-    }
+    // التوجيه يتم عبر useEffect بعد تحديث role في AuthContext
   };
 
   return (
