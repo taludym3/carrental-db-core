@@ -23,15 +23,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserRole = async (userId: string): Promise<void> => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
+      // استخدام RPC function الآمنة لتجاوز RLS
+      const { data, error } = await supabase.rpc('get_current_user_role');
       
       if (!error && data) {
-        setRole(data.role as UserRole);
+        setRole(data as UserRole);
       } else {
+        console.error('Error fetching role via RPC:', error);
         setRole(null);
       }
     } catch (error) {
