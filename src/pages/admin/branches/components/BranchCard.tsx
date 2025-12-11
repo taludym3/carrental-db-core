@@ -56,7 +56,11 @@ export function BranchCard({ branch, onView, onEdit, onDelete }: BranchCardProps
 
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-muted-foreground">-</span>
+            {branch.manager?.full_name ? (
+              <span>{branch.manager.full_name}</span>
+            ) : (
+              <span className="text-muted-foreground">لم يُعيَّن</span>
+            )}
           </div>
         </div>
 
