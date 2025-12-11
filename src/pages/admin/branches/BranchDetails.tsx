@@ -15,6 +15,10 @@ import {
   User,
   Building2,
   ExternalLink,
+  Car,
+  CalendarDays,
+  Users,
+  Calendar,
 } from 'lucide-react';
 import { BranchStatsCard } from './components/BranchStatsCard';
 import { BranchLocationMap } from './components/BranchLocationMap';
@@ -297,12 +301,7 @@ export default function BranchDetails() {
             ) : (
               <div className="text-center py-8">
                 <User className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground mb-4">لم يتم تعيين مدير لهذا الفرع</p>
-                <Button variant="outline" asChild>
-                  <Link to={`/admin/branches/${id}/edit`}>
-                    تعيين مدير
-                  </Link>
-                </Button>
+                <p className="text-muted-foreground">لم يتم تعيين مدير لهذا الفرع</p>
               </div>
             )}
           </CardContent>
@@ -325,6 +324,35 @@ export default function BranchDetails() {
         </Card>
       )}
 
+      {/* Quick Links */}
+      <Card>
+        <CardHeader>
+          <CardTitle>روابط سريعة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" asChild>
+              <Link to={`/admin/cars?branch=${id}`}>
+                <Car className="h-6 w-6" />
+                <span>سيارات الفرع</span>
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" asChild>
+              <Link to={`/admin/bookings?branch=${id}`}>
+                <CalendarDays className="h-6 w-6" />
+                <span>حجوزات الفرع</span>
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" asChild>
+              <Link to={`/admin/users?branch=${id}`}>
+                <Users className="h-6 w-6" />
+                <span>موظفو الفرع</span>
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Description */}
       {(branch.description_ar || branch.description_en) && (
         <Card>
@@ -343,6 +371,31 @@ export default function BranchDetails() {
           </CardContent>
         </Card>
       )}
+
+      {/* Dates */}
+      <Card>
+        <CardHeader>
+          <CardTitle>معلومات إضافية</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">تاريخ الإنشاء</p>
+                <p className="font-medium">{new Date(branch.created_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">آخر تحديث</p>
+                <p className="font-medium">{new Date(branch.updated_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

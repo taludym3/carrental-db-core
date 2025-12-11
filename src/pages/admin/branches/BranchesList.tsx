@@ -70,7 +70,27 @@ export default function BranchesList() {
       const { data, error } = await query;
       if (error) throw error;
 
-      return data || [];
+      // جلب أسماء المديرين
+      const managerIds = data?.filter(b => b.manager_id).map(b => b.manager_id) || [];
+      let managersMap: Record<string, string> = {};
+      
+      if (managerIds.length > 0) {
+        const { data: managers } = await supabase
+          .from('profiles')
+          .select('user_id, full_name')
+          .in('user_id', managerIds);
+        
+        managers?.forEach(m => {
+          if (m.user_id) {
+            managersMap[m.user_id] = m.full_name || '';
+          }
+        });
+      }
+
+      return data?.map(branch => ({
+        ...branch,
+        manager: branch.manager_id ? { full_name: managersMap[branch.manager_id] || null } : null
+      })) || [];
     },
   });
 
@@ -180,7 +200,11 @@ export default function BranchesList() {
                   </TableCell>
                   <TableCell>{branch.phone}</TableCell>
                   <TableCell>
-                    <span className="text-muted-foreground">-</span>
+                    {branch.manager?.full_name ? (
+                      <span>{branch.manager.full_name}</span>
+                    ) : (
+                      <span className="text-muted-foreground">لم يُعيَّن</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={branch.is_active ? 'default' : 'secondary'}>
