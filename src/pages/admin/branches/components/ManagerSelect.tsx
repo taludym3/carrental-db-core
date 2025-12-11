@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ManagerSelectProps {
-  value?: string; // ✅ خليها optional
+  value?: string;
   onValueChange: (value: string) => void;
   currentManagerId?: string;
 }
@@ -12,36 +12,12 @@ export function ManagerSelect({ value, onValueChange, currentManagerId }: Manage
   const { data: managers, isLoading } = useQuery({
     queryKey: ["branch-managers", currentManagerId],
     queryFn: async () => {
-      // Get all profiles with branch role
-      const { data: profiles, error: profilesError } = await supabase.from("profiles").select(`
-          user_id,
-          full_name,
-          email,
-          branch_id
-        `);
-
-      if (profilesError) throw profilesError;
-
-      // Get user roles
-      const userIds = profiles?.map((p) => p.user_id) || [];
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id, role")
-        .in("user_id", userIds)
-        .eq("role", "branch");
-
-      if (rolesError) throw rolesError;
-
-      // Filter profiles that have branch role and not assigned to another branch
-      const branchManagers = profiles?.filter((profile: any) => {
-        const hasRole = roles?.some((r) => r.user_id === profile.user_id);
-        const isCurrentManager = profile.user_id === currentManagerId;
-        const isNotAssigned = !profile.branch_id;
-
-        return hasRole && (isCurrentManager || isNotAssigned);
+      const { data, error } = await supabase.rpc('get_available_branch_managers', {
+        p_current_manager_id: currentManagerId || null
       });
 
-      return branchManagers || [];
+      if (error) throw error;
+      return data || [];
     },
   });
 
@@ -61,10 +37,19 @@ export function ManagerSelect({ value, onValueChange, currentManagerId }: Manage
         <SelectValue placeholder="اختر مدير الفرع (اختياري)" />
       </SelectTrigger>
       <SelectContent>
-        {/* ✅ حذفنا السطر المشكل */}
+        {managers?.length === 0 && (
+          <div className="px-2 py-1.5 text-sm text-muted-foreground">
+            لا يوجد مدراء متاحين
+          </div>
+        )}
         {managers?.map((manager: any) => (
-          <SelectItem key={manager.user_id} value={manager.user_id}>
+          <SelectItem 
+            key={manager.user_id} 
+            value={manager.user_id}
+            disabled={manager.is_assigned && manager.user_id !== currentManagerId}
+          >
             {manager.full_name || manager.email}
+            {manager.is_assigned && manager.user_id !== currentManagerId && " (معين لفرع آخر)"}
           </SelectItem>
         ))}
       </SelectContent>

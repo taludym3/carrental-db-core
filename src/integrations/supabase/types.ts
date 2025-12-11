@@ -1933,6 +1933,16 @@ export type Database = {
         Args: { _car_id: string; _end_date?: string; _start_date?: string }
         Returns: number
       }
+      get_available_branch_managers: {
+        Args: { p_current_manager_id?: string }
+        Returns: {
+          branch_id: string
+          email: string
+          full_name: string
+          is_assigned: boolean
+          user_id: string
+        }[]
+      }
       get_booking_details: {
         Args: { p_booking_id: string }
         Returns: {
