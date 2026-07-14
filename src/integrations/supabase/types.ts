@@ -2908,8 +2908,6 @@ export type Database = {
         Args: { p_car_id: string; p_feature_ids: string[] }
         Returns: undefined
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown
