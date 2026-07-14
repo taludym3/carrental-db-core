@@ -18,7 +18,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
   // Timeout بعد 8 ثواني إذا لم يتم جلب الدور
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     
     if (user && role === null && !loading) {
       timer = setTimeout(() => {

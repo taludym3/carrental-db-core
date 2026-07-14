@@ -712,6 +712,27 @@ export type Database = {
           },
         ]
       }
+      deleted_users: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string
@@ -948,6 +969,7 @@ export type Database = {
           branch_id: string | null
           created_at: string
           email: string | null
+          expo_push_token: string | null
           full_name: string | null
           gender: string | null
           geom: unknown
@@ -968,6 +990,7 @@ export type Database = {
           branch_id?: string | null
           created_at?: string
           email?: string | null
+          expo_push_token?: string | null
           full_name?: string | null
           gender?: string | null
           geom?: unknown
@@ -988,6 +1011,7 @@ export type Database = {
           branch_id?: string | null
           created_at?: string
           email?: string | null
+          expo_push_token?: string | null
           full_name?: string | null
           gender?: string | null
           geom?: unknown
@@ -1632,6 +1656,7 @@ export type Database = {
           model_name: string
         }[]
       }
+      check_is_user_deleted: { Args: { identifier: string }; Returns: boolean }
       check_rate_limit: {
         Args: {
           p_action_type: string
@@ -2241,7 +2266,7 @@ export type Database = {
         Returns: {
           approval_rate: number
           approved_documents: number
-          average_verification_time: unknown
+          average_verification_time: string
           daily_submissions: Json
           document_types_breakdown: Json
           pending_documents: number
@@ -2562,6 +2587,10 @@ export type Database = {
       make_booking_range: {
         Args: { _end: string; _start: string }
         Returns: unknown
+      }
+      merge_guest_to_customer: {
+        Args: { p_guest_id: string; p_user_id: string }
+        Returns: undefined
       }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
@@ -3567,6 +3596,7 @@ export type Database = {
       update_user_location: {
         Args: {
           _location: string
+          _location_accuracy?: number
           _user_latitude: number
           _user_longitude: number
         }
