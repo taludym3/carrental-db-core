@@ -1671,6 +1671,7 @@ export type Database = {
         Returns: boolean
       }
       check_user_is_customer: { Args: never; Returns: boolean }
+      check_user_role_v3: { Args: { p_user_id: string }; Returns: boolean }
       cleanup_expired_bookings: {
         Args: never
         Returns: {
@@ -2139,6 +2140,54 @@ export type Database = {
           utilization_rate: number
         }[]
       }
+      get_car_by_id: {
+        Args: { p_car_id: string }
+        Returns: {
+          actual_available_quantity: number | null
+          additional_images: string[] | null
+          available_quantity: number | null
+          branch_id: string | null
+          branch_name_ar: string | null
+          branch_name_en: string | null
+          brand_name_ar: string | null
+          brand_name_en: string | null
+          color_hex_code: string | null
+          color_name_ar: string | null
+          color_name_en: string | null
+          created_at: string | null
+          daily_price: number | null
+          default_image_url: string | null
+          description_ar: string | null
+          description_en: string | null
+          discount_percentage: number | null
+          feature_ids: string[] | null
+          features_ar: string[] | null
+          features_en: string[] | null
+          fuel_type: string | null
+          has_active_offer: boolean | null
+          id: string | null
+          is_new: boolean | null
+          mileage: number | null
+          model_name_ar: string | null
+          model_name_en: string | null
+          monthly_price: number | null
+          offer_expires_at: string | null
+          ownership_price: number | null
+          quantity: number | null
+          rental_types: Database["public"]["Enums"]["rental_type"][] | null
+          seats: number | null
+          status: Database["public"]["Enums"]["car_status"] | null
+          transmission: string | null
+          updated_at: string | null
+          weekly_price: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "cars_with_details"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_car_features: {
         Args: { p_car_id: string }
         Returns: {
@@ -2538,6 +2587,21 @@ export type Database = {
         }[]
       }
       get_user_details: { Args: { p_user_id: string }; Returns: Json }
+      get_user_notifications: {
+        Args: { _limit?: number; _offset?: number; _unread_only?: boolean }
+        Returns: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message_ar: string
+          message_en: string
+          metadata: Json
+          title_ar: string
+          title_en: string
+          type: string
+          user_id: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -2587,6 +2651,10 @@ export type Database = {
       make_booking_range: {
         Args: { _end: string; _start: string }
         Returns: unknown
+      }
+      mark_notifications_read: {
+        Args: { _notification_ids?: string[] }
+        Returns: undefined
       }
       merge_guest_to_customer: {
         Args: { p_guest_id: string; p_user_id: string }
